@@ -111,65 +111,36 @@ const SoundManager = {
     this.elements.hint = document.getElementById('hint-sound');
     this.elements.celebration = document.getElementById('celebration-sound');
     
-    // Set up audio controls
-    const audioControls = document.getElementById('audio-controls');
-    const playPauseBtn = document.getElementById('play-pause-btn');
-    const volumeSlider = document.getElementById('volume-slider');
-    const nextTrackBtn = document.getElementById('next-track-btn');
-    
-    // Initially show the audio controls
-    audioControls.classList.remove('hidden');
-    
-    // Set initial volume
-    this.elements.backgroundMusic.volume = 0.5;
-    
-    // Handle errors for audio files that might not exist yet
-    this.elements.backgroundMusic.addEventListener('error', (e) => {
-      console.log('Background music file not found, using Web Audio API fallback');
-      // The game will fall back to Web Audio API sounds
-    });
-    
-    // Set the first track as source
-    this.elements.backgroundMusic.src = this.sounds.backgroundMusic[this.currentMusicIndex];
-    
-    // For mobile devices, we need user interaction to start playing
-    document.addEventListener('click', () => {
-      if (!this.elements.backgroundMusic.src) {
-        this.elements.backgroundMusic.src = this.sounds.backgroundMusic[this.currentMusicIndex];
+    // Set initial volume - use a default value
+    if (this.elements.backgroundMusic) {
+      this.elements.backgroundMusic.volume = 0.5;
+      
+      // Handle errors for audio files that might not exist yet
+      this.elements.backgroundMusic.addEventListener('error', (e) => {
+        console.log('Background music file not found, using Web Audio API fallback');
+        // The game will fall back to Web Audio API sounds
+      });
+      
+      // Set the first track as source
+      this.elements.backgroundMusic.src = this.sounds.backgroundMusic[this.currentMusicIndex];
+      
+      // For mobile devices, we need user interaction to start playing
+      document.addEventListener('click', () => {
+        if (this.elements.backgroundMusic && !this.elements.backgroundMusic.src) {
+          this.elements.backgroundMusic.src = this.sounds.backgroundMusic[this.currentMusicIndex];
+        }
+      }, { once: true });
+      
+      // Load volume preference if exists
+      const savedVolume = localStorage.getItem('eggHuntVolume');
+      if (savedVolume !== null) {
+        this.elements.backgroundMusic.volume = parseFloat(savedVolume);
       }
-    }, { once: true });
-    
-    // Play/Pause button functionality
-    playPauseBtn.addEventListener('click', () => {
-      if (this.elements.backgroundMusic.paused) {
-        this.elements.backgroundMusic.play().catch(e => {
-          console.log('Failed to play background music, likely missing file');
-        });
-        playPauseBtn.textContent = '⏸️';
-      } else {
-        this.elements.backgroundMusic.pause();
-        playPauseBtn.textContent = '▶️';
-      }
-    });
-    
-    // Volume slider functionality
-    volumeSlider.addEventListener('input', (e) => {
-      const volume = e.target.value / 100;
-      this.elements.backgroundMusic.volume = volume;
-      // Store the volume preference
-      localStorage.setItem('eggHuntVolume', volume);
-    });
-    
-    // Next track button functionality
-    nextTrackBtn.addEventListener('click', () => {
-      this.nextTrack();
-    });
-    
-    // Load volume preference if exists
-    const savedVolume = localStorage.getItem('eggHuntVolume');
-    if (savedVolume !== null) {
-      this.elements.backgroundMusic.volume = parseFloat(savedVolume);
-      volumeSlider.value = parseFloat(savedVolume) * 100;
+      
+      // Listen for when a track ends and play the next one
+      this.elements.backgroundMusic.addEventListener('ended', () => {
+        this.nextTrack();
+      });
     }
     
     // Set other audio sources with error handling
@@ -177,15 +148,10 @@ const SoundManager = {
     this.setupAudioSource(this.elements.hint, this.sounds.hint);
     this.setupAudioSource(this.elements.celebration, this.sounds.celebration);
     
-    // Lower volume for effect sounds
-    this.elements.eggFound.volume = 0.6;
-    this.elements.hint.volume = 0.4;
-    this.elements.celebration.volume = 0.7;
-    
-    // Listen for when a track ends and play the next one
-    this.elements.backgroundMusic.addEventListener('ended', () => {
-      this.nextTrack();
-    });
+    // Lower volume for effect sounds if they exist
+    if (this.elements.eggFound) this.elements.eggFound.volume = 0.6;
+    if (this.elements.hint) this.elements.hint.volume = 0.4;
+    if (this.elements.celebration) this.elements.celebration.volume = 0.7;
   },
   
   // Helper method to set audio source with error handling
@@ -358,27 +324,6 @@ eggModal.addEventListener('click', function(e) {
     }
 });
 
-// Initialize sound toggle
-function initSoundToggle() {
-  const soundToggle = document.createElement('button');
-  soundToggle.id = 'sound-toggle';
-  soundToggle.className = 'icon-button';
-  soundToggle.innerHTML = soundEnabled ? '🔊' : '🔇';
-  soundToggle.title = soundEnabled ? 'Mute Sounds' : 'Enable Sounds';
-  soundToggle.onclick = toggleSound;
-  document.body.appendChild(soundToggle);
-}
-
-// Toggle sound effects
-function toggleSound() {
-  soundEnabled = !soundEnabled;
-  const soundToggle = document.getElementById('sound-toggle');
-  if (soundToggle) {
-    soundToggle.innerHTML = soundEnabled ? '🔊' : '🔇';
-    soundToggle.title = soundEnabled ? 'Mute Sounds' : 'Enable Sounds';
-  }
-}
-
 // Initialize sounds (called on first user interaction)
 function initSounds() {
   if (!sounds.pop) sounds.pop = createSound('pop');
@@ -388,9 +333,6 @@ function initSounds() {
 
 // Initialize the app when the page loads
 window.onload = function() {
-  // Initialize sound toggle button
-  initSoundToggle();
-  
   // Add a confetti effect for celebration
   addConfettiCanvas();
   
@@ -461,9 +403,71 @@ function ensureViewportMeta() {
 function initFastClick() {
   if (touchEnabled) {
     document.addEventListener('DOMContentLoaded', function() {
-      // You could add a lightweight FastClick implementation here, 
-      // or use the library via CDN if needed
-      document.body.style.touchAction = 'manipulation'; // This helps on modern browsers
+      // Apply touch-action manipulation to all interactive elements
+      document.body.style.touchAction = 'manipulation';
+      
+      // Enhanced touch event handlers for all buttons
+      const enhanceButtonTouchSupport = () => {
+        // Find all buttons and button-like elements
+        const buttons = document.querySelectorAll('button, .main-btn, .control-btn, .egg, .setup-egg, .more-settings-toggle');
+        buttons.forEach(button => {
+          // Remove existing touch handlers if any, to prevent duplicates
+          button.removeEventListener('touchstart', handleTouchStart);
+          button.removeEventListener('touchend', handleTouchEnd);
+          
+          // Add active state for visual feedback
+          button.addEventListener('touchstart', handleTouchStart, { passive: true });
+          button.addEventListener('touchend', handleTouchEnd);
+        });
+      };
+      
+      // Touch handlers for better visual feedback and reliability
+      function handleTouchStart(e) {
+        // Add an active state class
+        this.classList.add('touch-active');
+      }
+      
+      function handleTouchEnd(e) {
+        // Remove the active state
+        this.classList.remove('touch-active');
+        
+        // Stop event propagation to prevent unwanted clicks
+        e.stopPropagation();
+        
+        // Small delay to ensure click event is processed
+        setTimeout(() => {
+          // Check if this was a tap rather than a drag
+          const target = e.currentTarget;
+          if (target && !target.classList.contains('setup-egg')) {
+            // For non-draggable elements, trigger a click
+            if (!e.defaultPrevented) {
+              // Create and dispatch a click event
+              const clickEvent = new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                view: window
+              });
+              target.dispatchEvent(clickEvent);
+            }
+          }
+        }, 10);
+      }
+      
+      // Initial enhancement
+      enhanceButtonTouchSupport();
+      
+      // Re-enhance after any screen changes
+      ['setup-btn', 'start-game-btn', 'reset-btn'].forEach(btnId => {
+        const btn = document.getElementById(btnId);
+        if (btn) {
+          const originalClick = btn.onclick;
+          btn.onclick = function(e) {
+            if (originalClick) originalClick.call(this, e);
+            // Re-apply touch enhancements after a delay to allow screen changes
+            setTimeout(enhanceButtonTouchSupport, 500);
+          };
+        }
+      });
     });
   }
 }

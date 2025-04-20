@@ -1253,3 +1253,11 @@ body, html {
         font-size: 0.7em;
     }
 }
+
+/* Touch active state for better mobile feedback */
+.touch-active {
+    transform: scale(0.95) !important;
+    opacity: 0.9 !important;
+    transition: transform 0.1s, opacity 0.1s !important;
+    background-color: rgba(255, 153, 204, 0.8) !important;
+}
