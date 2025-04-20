@@ -747,7 +747,7 @@ body, html {
     cursor: pointer;
     transition: all 0.3s;
     font-size: 1em;
-    font-family: 'Comic Sans MS', cursive, sans-serif;
+    font-family: 'Comic Neue Local', 'Comic Neue', 'Comic Sans MS', cursive, sans-serif;
 }
 
 #modal-save-btn:hover, #modal-remove-btn:hover, #modal-cancel-btn:hover {
@@ -1123,4 +1123,133 @@ body, html {
     color: #8855dd;
     font-size: 1.1em;
     text-align: center;
+}
+
+/* Enhanced touch support for buttons */
+.main-btn, .control-btn, #modal-save-btn, #modal-remove-btn, #modal-cancel-btn, #hint-button, 
+#restart-btn, #reset-btn, #file-upload-btn, #camera-capture {
+    touch-action: manipulation; /* Prevents delay on touch devices */
+    -webkit-tap-highlight-color: rgba(0,0,0,0); /* Removes the default mobile tap highlight */
+    user-select: none; /* Prevents text selection when tapping */
+}
+
+/* Make touch targets larger on mobile - ensures minimum 44x44px tap area per iOS guidelines */
+@media (max-width: 768px) {
+    .main-btn, .control-btn, #modal-save-btn, #modal-remove-btn, #modal-cancel-btn, #hint-button, 
+    #restart-btn, #reset-btn, #file-upload-btn, #camera-capture {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 12px 20px;
+        margin: 8px 4px;
+    }
+    
+    /* Add visible feedback for touch interactions */
+    .main-btn:active, .control-btn:active, #modal-save-btn:active, #modal-remove-btn:active, 
+    #modal-cancel-btn:active, #hint-button:active, #restart-btn:active, #reset-btn:active {
+        transform: scale(0.96);
+        opacity: 0.9;
+        transition: transform 0.1s, opacity 0.1s;
+    }
+}
+
+/* More Settings section styles */
+.more-settings {
+    margin: 20px 0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.more-settings-toggle {
+    width: 100%;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 15px;
+    background: #ffeecc;
+    border: 2px solid #ffcc99;
+    border-radius: 8px;
+    color: #cc6633;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: bold;
+}
+
+.more-settings-toggle:hover {
+    background: #ffcc99;
+}
+
+.more-settings-icon {
+    margin-right: 8px;
+}
+
+.toggle-icon {
+    transition: transform 0.3s;
+}
+
+.more-settings-toggle[aria-expanded="true"] .toggle-icon {
+    transform: rotate(180deg);
+}
+
+.more-settings-content {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid #ffcccc;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 15px;
+    transition: max-height 0.3s ease-out;
+}
+
+.settings-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.audio-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.audio-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.sound-toggle-setting {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 5px;
+}
+
+/* Mini buttons for settings panel */
+.mini-btn {
+    padding: 8px 12px;
+    min-height: 36px;
+    min-width: 36px;
+    font-size: 0.9em;
+}
+
+/* Version number display */
+.version-info {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    font-size: 0.8em;
+    color: rgba(136, 85, 221, 0.7);
+    background-color: rgba(255, 255, 255, 0.4);
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-family: 'Comic Neue Local', 'Comic Neue', monospace;
+}
+
+@media (max-width: 480px) {
+    .version-info {
+        bottom: 5px;
+        right: 5px;
+        font-size: 0.7em;
+    }
 }

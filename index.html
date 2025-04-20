@@ -16,6 +16,7 @@
         <p>Hide eggs around your living room for the kids to find!</p>
         <div class="easter-decoration">🐰 🥚 🐣</div>
         <button id="setup-btn" class="main-btn">Setup Hunt</button>
+        <div class="version-info">v<span id="game-version">1.2.0</span></div>
     </div>
     
     <!-- Setup Loading Screen -->
@@ -56,6 +57,31 @@
                 
                 <div class="button-group">
                     <button id="add-egg-btn" class="control-btn">Add Egg</button>
+                </div>
+                
+                <!-- More Settings section (collapsible) -->
+                <div class="more-settings">
+                    <button class="more-settings-toggle control-btn" aria-expanded="false">
+                        <span class="more-settings-icon">⚙️</span> More Settings
+                        <span class="toggle-icon">▼</span>
+                    </button>
+                    <div class="more-settings-content hidden">
+                        <h3>Audio Settings</h3>
+                        <div class="settings-panel">
+                            <div class="audio-settings">
+                                <label for="volume-slider-setup">Music Volume:</label>
+                                <input type="range" id="volume-slider-setup" class="volume-slider" min="0" max="100" value="50">
+                                <div class="audio-buttons">
+                                    <button id="play-pause-btn-setup" title="Play/Pause Background Music" class="control-btn mini-btn">▶️</button>
+                                    <button id="next-track-btn-setup" title="Next Track" class="control-btn mini-btn">⏭️</button>
+                                </div>
+                            </div>
+                            <div class="sound-toggle-setting">
+                                <label for="sound-toggle-setup">Sound Effects:</label>
+                                <button id="sound-toggle-setup" class="control-btn mini-btn" data-enabled="true">🔊</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <h3>Your Eggs</h3>

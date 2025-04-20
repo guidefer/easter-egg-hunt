@@ -13,6 +13,9 @@ let isNewEgg = false; // Flag to track if we're creating a new egg or editing ex
 let currentBackground = 'Living-room.png'; // Track the current background image
 let touchEnabled = 'ontouchstart' in window; // Detect if device supports touch
 
+// Game version - update this when making significant changes
+const GAME_VERSION = '1.2.0'; // Major.Minor.Patch format
+
 // Sound effects using the Web Audio API
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 const sounds = {
@@ -413,7 +416,21 @@ window.onload = function() {
   
   // Initialize animation manager
   AnimationManager.init();
+  
+  // Initialize the collapsible "More Settings" section
+  initMoreSettings();
+  
+  // Update version number in the UI
+  updateVersionDisplay();
 };
+
+// Update version number in the UI
+function updateVersionDisplay() {
+  const versionElement = document.getElementById('game-version');
+  if (versionElement) {
+    versionElement.textContent = GAME_VERSION;
+  }
+}
 
 // Add a canvas for confetti effects
 function addConfettiCanvas() {
@@ -1874,4 +1891,111 @@ function startSetupWithLoading() {
             }, 300);
         }
     }, 80); // Slightly faster update for setup
+}
+
+// Initialize collapsible "More Settings" section
+function initMoreSettings() {
+  const moreSettingsToggle = document.querySelector('.more-settings-toggle');
+  const moreSettingsContent = document.querySelector('.more-settings-content');
+  
+  if (moreSettingsToggle && moreSettingsContent) {
+    // Set up click handler for the toggle button
+    moreSettingsToggle.addEventListener('click', function() {
+      // Toggle the expanded state
+      const isExpanded = moreSettingsToggle.getAttribute('aria-expanded') === 'true';
+      moreSettingsToggle.setAttribute('aria-expanded', !isExpanded);
+      
+      // Toggle visibility of content
+      if (isExpanded) {
+        moreSettingsContent.classList.add('hidden');
+      } else {
+        moreSettingsContent.classList.remove('hidden');
+      }
+    });
+    
+    // Connect setup audio controls to the main audio controls
+    const setupVolumeSlider = document.getElementById('volume-slider-setup');
+    const mainVolumeSlider = document.getElementById('volume-slider');
+    const playPauseSetupBtn = document.getElementById('play-pause-btn-setup');
+    const nextTrackSetupBtn = document.getElementById('next-track-btn-setup');
+    const soundToggleSetupBtn = document.getElementById('sound-toggle-setup');
+    
+    if (setupVolumeSlider && mainVolumeSlider) {
+      // Sync initial value
+      setupVolumeSlider.value = mainVolumeSlider.value;
+      
+      // Setup volume slider changes update main volume
+      setupVolumeSlider.addEventListener('input', function(e) {
+        const volume = e.target.value / 100;
+        // Update the main volume slider
+        mainVolumeSlider.value = e.target.value;
+        // Update actual volume
+        const backgroundMusic = document.getElementById('background-music');
+        if (backgroundMusic) {
+          backgroundMusic.volume = volume;
+        }
+        // Store the volume preference
+        localStorage.setItem('eggHuntVolume', volume);
+      });
+    }
+    
+    // Play/Pause button in setup mirrors main play/pause
+    if (playPauseSetupBtn) {
+      playPauseSetupBtn.addEventListener('click', function() {
+        const backgroundMusic = document.getElementById('background-music');
+        if (backgroundMusic) {
+          if (backgroundMusic.paused) {
+            backgroundMusic.play().catch(e => {
+              console.log('Failed to play background music, likely missing file');
+            });
+            playPauseSetupBtn.textContent = '⏸️';
+            // Sync with main play button
+            const mainPlayBtn = document.getElementById('play-pause-btn');
+            if (mainPlayBtn) mainPlayBtn.textContent = '⏸️';
+          } else {
+            backgroundMusic.pause();
+            playPauseSetupBtn.textContent = '▶️';
+            // Sync with main play button
+            const mainPlayBtn = document.getElementById('play-pause-btn');
+            if (mainPlayBtn) mainPlayBtn.textContent = '▶️';
+          }
+        }
+      });
+    }
+    
+    // Next track button in setup mirrors main next track
+    if (nextTrackSetupBtn) {
+      nextTrackSetupBtn.addEventListener('click', function() {
+        SoundManager.nextTrack();
+      });
+    }
+    
+    // Sound toggle in setup mirrors main sound toggle
+    if (soundToggleSetupBtn) {
+      // Set initial state
+      soundToggleSetupBtn.textContent = soundEnabled ? '🔊' : '🔇';
+      
+      // Add click handler
+      soundToggleSetupBtn.addEventListener('click', function() {
+        // Toggle sound enabled state
+        soundEnabled = !soundEnabled;
+        // Update button text
+        soundToggleSetupBtn.textContent = soundEnabled ? '🔊' : '🔇';
+        // Also update the main sound toggle button
+        const soundToggle = document.getElementById('sound-toggle');
+        if (soundToggle) {
+          soundToggle.innerHTML = soundEnabled ? '🔊' : '🔇';
+          soundToggle.title = soundEnabled ? 'Mute Sounds' : 'Enable Sounds';
+        }
+      });
+    }
+    
+    // On mobile, hide the floating audio controls and only use the setup panel
+    if (touchEnabled) {
+      const audioControls = document.getElementById('audio-controls');
+      if (audioControls) {
+        audioControls.classList.add('hidden');
+      }
+    }
+  }
 }
