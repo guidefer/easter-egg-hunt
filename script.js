@@ -406,70 +406,143 @@ function initFastClick() {
       // Apply touch-action manipulation to all interactive elements
       document.body.style.touchAction = 'manipulation';
       
-      // Enhanced touch event handlers for all buttons
-      const enhanceButtonTouchSupport = () => {
-        // Find all buttons and button-like elements
-        const buttons = document.querySelectorAll('button, .main-btn, .control-btn, .egg, .setup-egg, .more-settings-toggle');
-        buttons.forEach(button => {
-          // Remove existing touch handlers if any, to prevent duplicates
-          button.removeEventListener('touchstart', handleTouchStart);
-          button.removeEventListener('touchend', handleTouchEnd);
-          
-          // Add active state for visual feedback
-          button.addEventListener('touchstart', handleTouchStart, { passive: true });
-          button.addEventListener('touchend', handleTouchEnd);
-        });
-      };
+      // Fix for iOS Safari and Chrome touch issues
+      fixButtonTouchSupport();
       
-      // Touch handlers for better visual feedback and reliability
-      function handleTouchStart(e) {
-        // Add an active state class
-        this.classList.add('touch-active');
-      }
-      
-      function handleTouchEnd(e) {
-        // Remove the active state
-        this.classList.remove('touch-active');
-        
-        // Stop event propagation to prevent unwanted clicks
-        e.stopPropagation();
-        
-        // Small delay to ensure click event is processed
-        setTimeout(() => {
-          // Check if this was a tap rather than a drag
-          const target = e.currentTarget;
-          if (target && !target.classList.contains('setup-egg')) {
-            // For non-draggable elements, trigger a click
-            if (!e.defaultPrevented) {
-              // Create and dispatch a click event
-              const clickEvent = new MouseEvent('click', {
-                bubbles: true,
-                cancelable: true,
-                view: window
-              });
-              target.dispatchEvent(clickEvent);
-            }
-          }
-        }, 10);
-      }
-      
-      // Initial enhancement
-      enhanceButtonTouchSupport();
-      
-      // Re-enhance after any screen changes
-      ['setup-btn', 'start-game-btn', 'reset-btn'].forEach(btnId => {
-        const btn = document.getElementById(btnId);
-        if (btn) {
-          const originalClick = btn.onclick;
-          btn.onclick = function(e) {
-            if (originalClick) originalClick.call(this, e);
-            // Re-apply touch enhancements after a delay to allow screen changes
-            setTimeout(enhanceButtonTouchSupport, 500);
-          };
-        }
-      });
+      // Re-apply fixes after DOM changes
+      document.addEventListener('DOMContentLoaded', fixButtonTouchSupport);
+      window.addEventListener('resize', fixButtonTouchSupport);
     });
   }
+}
+
+// Fix button touch support across all browsers
+function fixButtonTouchSupport() {
+  console.log('Fixing button touch support');
+  
+  // Select all interactive elements
+  const buttons = document.querySelectorAll('button, .main-btn, .control-btn, .egg, .setup-egg, .more-settings-toggle');
+  
+  buttons.forEach(button => {
+    // Clean up any existing listeners to prevent duplicates
+    button.removeEventListener('touchstart', handleTouchStart);
+    button.removeEventListener('touchend', handleTouchEnd);
+    button.removeEventListener('click', handleButtonClick);
+    
+    // Explicitly make sure the element is clickable 
+    button.style.cursor = 'pointer';
+    button.style.webkitTouchCallout = 'none'; // Disable callout on iOS
+    button.style.webkitUserSelect = 'none'; // Disable selection on iOS
+    
+    // Add touch listeners with proper event options
+    button.addEventListener('touchstart', handleTouchStart, { passive: true });
+    button.addEventListener('touchend', handleTouchEnd, { passive: false });
+    
+    // Backup click handler for non-touch fallback or if touch doesn't work
+    button.addEventListener('click', handleButtonClick);
+  });
+  
+  // Special handling for mobile game eggs
+  const gameEggs = document.querySelectorAll('.egg');
+  gameEggs.forEach(egg => {
+    // Ensure game eggs have appropriate styles and behaviors
+    if (egg.style.pointerEvents !== 'none') {
+      egg.style.pointerEvents = 'auto';
+      egg.style.cursor = 'pointer';
+    }
+  });
+}
+
+// Touch start handler
+function handleTouchStart(e) {
+  // Add active state class
+  this.classList.add('touch-active');
+  
+  // Store touch position for later comparison
+  if (e.touches && e.touches[0]) {
+    this.dataset.touchStartX = e.touches[0].clientX;
+    this.dataset.touchStartY = e.touches[0].clientY;
+  }
+}
+
+// Touch end handler
+function handleTouchEnd(e) {
+  // Get the element
+  const element = this;
+  
+  // Remove touch-active state
+  element.classList.remove('touch-active');
+
+  // Check if this was a tap rather than a scroll/swipe
+  // by comparing start and end positions
+  const touchEndX = e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientX : null;
+  const touchEndY = e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientY : null;
+  const touchStartX = parseFloat(element.dataset.touchStartX || 0);
+  const touchStartY = parseFloat(element.dataset.touchStartY || 0);
+  
+  // Clear stored touch data
+  delete element.dataset.touchStartX;
+  delete element.dataset.touchStartY;
+  
+  // If movement was minimal (less than 10px), treat as a tap
+  if (touchEndX !== null && 
+      Math.abs(touchEndX - touchStartX) < 10 && 
+      Math.abs(touchEndY - touchStartY) < 10) {
+      
+    // Stop default actions for this event
+    e.preventDefault();
+    
+    // On Safari, sometimes we need to manually trigger the click
+    setTimeout(function() {
+      // Skip if this is a draggable egg
+      if (element.classList.contains('setup-egg') && draggedEgg) {
+        return;
+      }
+      
+      // Determine the action based on element properties
+      if (element.id === 'hint-button') {
+        showHint();
+      } 
+      else if (element.classList.contains('egg')) {
+        const eggIndex = parseInt(element.dataset.eggIndex || -1);
+        if (eggIndex === currentEggIndex) {
+          eggFound(element);
+        }
+      }
+      else if (typeof element.onclick === 'function') {
+        // Call the onclick handler directly
+        element.onclick();
+      }
+      else {
+        // Simulate a click event
+        const clickEvent = new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          view: window
+        });
+        element.dispatchEvent(clickEvent);
+      }
+    }, 10);
+  }
+}
+
+// Backup click handler
+function handleButtonClick(e) {
+  // This provides a backup for when touch events fail
+  // Most browsers use this for non-touch interactions
+  // Some mobile browsers may fall back to this for touch as well
+  
+  // Check if this is already handled by touch events
+  if (touchEnabled && e.pointerType === 'touch') {
+    // Already handled by touch events
+    return;
+  }
+  
+  // Add the active state briefly
+  this.classList.add('touch-active');
+  setTimeout(() => {
+    this.classList.remove('touch-active');
+  }, 150);
 }
 
 // ------ Modal Functions ------

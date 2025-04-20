@@ -1261,3 +1261,45 @@ body, html {
     transition: transform 0.1s, opacity 0.1s !important;
     background-color: rgba(255, 153, 204, 0.8) !important;
 }
+
+/* Fix for iOS Safari and Chrome touch target issues */
+button, .main-btn, .control-btn, .egg, .more-settings-toggle {
+    /* Increase the touch target area beyond the visible button */
+    position: relative;
+}
+
+/* Adds invisible padding around buttons for better touch targets */
+button::after, .main-btn::after, .control-btn::after, .egg::after,  
+.more-settings-toggle::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    z-index: -1;
+}
+
+/* Fix touch interaction in Chrome for mobile */
+@media (pointer: coarse) {
+    /* Target only touchscreens */
+    button, .main-btn, .control-btn, .hint-button, .egg, .setup-egg {
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        /* Add button specific tap highlight */
+        background-position: center; /* Enable ripple effect */
+        transition: background 0.5s;
+    }
+    
+    /* Add a ripple effect when touched */
+    button:active, .main-btn:active, .control-btn:active, 
+    .hint-button:active, .egg:active, .setup-egg:active {
+        background: radial-gradient(circle, rgba(255,255,255,0.4) 1%, transparent 1%) center/15000%;
+    }
+    
+    /* Ensure egg buttons are easier to tap by increasing size */
+    .egg {
+        min-width: 60px;
+        min-height: 60px;
+    }
+}
