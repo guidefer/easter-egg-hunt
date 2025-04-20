@@ -14,7 +14,7 @@ let currentBackground = 'Living-room.png'; // Track the current background image
 let touchEnabled = 'ontouchstart' in window; // Detect if device supports touch
 
 // Game version - update this when making significant changes
-const GAME_VERSION = '1.3.1'; // Updated version to reflect recent fixes
+const GAME_VERSION = '1.2.0'; // Major.Minor.Patch format
 
 // Sound effects using the Web Audio API
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -406,82 +406,70 @@ function initFastClick() {
       // Apply touch-action manipulation to all interactive elements
       document.body.style.touchAction = 'manipulation';
       
-      // Fix for iOS Safari and Chrome touch issues
-      fixButtonTouchSupport();
+      // Enhanced touch event handlers for all buttons
+      const enhanceButtonTouchSupport = () => {
+        // Find all buttons and button-like elements
+        const buttons = document.querySelectorAll('button, .main-btn, .control-btn, .egg, .setup-egg, .more-settings-toggle');
+        buttons.forEach(button => {
+          // Remove existing touch handlers if any, to prevent duplicates
+          button.removeEventListener('touchstart', handleTouchStart);
+          button.removeEventListener('touchend', handleTouchEnd);
+          
+          // Add active state for visual feedback
+          button.addEventListener('touchstart', handleTouchStart, { passive: true });
+          button.addEventListener('touchend', handleTouchEnd);
+        });
+      };
       
-      // Re-apply fixes after DOM changes
-      document.addEventListener('DOMContentLoaded', fixButtonTouchSupport);
-      window.addEventListener('resize', fixButtonTouchSupport);
+      // Touch handlers for better visual feedback and reliability
+      function handleTouchStart(e) {
+        // Add an active state class
+        this.classList.add('touch-active');
+      }
+      
+      function handleTouchEnd(e) {
+        // Remove the active state
+        this.classList.remove('touch-active');
+        
+        // Stop event propagation to prevent unwanted clicks
+        e.stopPropagation();
+        
+        // Small delay to ensure click event is processed
+        setTimeout(() => {
+          // Check if this was a tap rather than a drag
+          const target = e.currentTarget;
+          if (target && !target.classList.contains('setup-egg')) {
+            // For non-draggable elements, trigger a click
+            if (!e.defaultPrevented) {
+              // Create and dispatch a click event
+              const clickEvent = new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                view: window
+              });
+              target.dispatchEvent(clickEvent);
+            }
+          }
+        }, 10);
+      }
+      
+      // Initial enhancement
+      enhanceButtonTouchSupport();
+      
+      // Re-enhance after any screen changes
+      ['setup-btn', 'start-game-btn', 'reset-btn'].forEach(btnId => {
+        const btn = document.getElementById(btnId);
+        if (btn) {
+          const originalClick = btn.onclick;
+          btn.onclick = function(e) {
+            if (originalClick) originalClick.call(this, e);
+            // Re-apply touch enhancements after a delay to allow screen changes
+            setTimeout(enhanceButtonTouchSupport, 500);
+          };
+        }
+      });
     });
   }
-}
-
-// Fix button touch support across all browsers
-function fixButtonTouchSupport() {
-  console.log('Fixing button touch support');
-
-  // Select all interactive elements
-  const buttons = document.querySelectorAll('button, .main-btn, .control-btn, .egg, .setup-egg, .more-settings-toggle');
-
-  buttons.forEach(button => {
-    // Clean up any existing listeners to prevent duplicates
-    button.removeEventListener('touchstart', handleTouchStart);
-    button.removeEventListener('touchend', handleTouchEnd);
-
-    // Explicitly make sure the element is clickable 
-    button.style.cursor = 'pointer';
-    button.style.webkitTouchCallout = 'none'; // Disable callout on iOS
-    button.style.webkitUserSelect = 'none'; // Disable selection on iOS
-
-    // Add touch listeners primarily for visual feedback
-    button.addEventListener('touchstart', handleTouchStart, { passive: true });
-    button.addEventListener('touchend', handleTouchEnd, { passive: true });
-  });
-
-  // Special handling for mobile game eggs - ensure pointer events are correct
-  const gameEggs = document.querySelectorAll('.egg');
-  gameEggs.forEach(egg => {
-    // Ensure game eggs have appropriate styles and behaviors
-    if (egg.style.pointerEvents !== 'none') {
-      egg.style.pointerEvents = 'auto';
-      egg.style.cursor = 'pointer';
-    }
-  });
-}
-
-// Touch start handler - Adds visual feedback
-function handleTouchStart(e) {
-  // Add active state class
-  this.classList.add('touch-active');
-}
-
-// Touch end handler - Removes visual feedback
-function handleTouchEnd(e) {
-  // Get the element
-  const element = this;
-
-  // Remove touch-active state immediately
-  element.classList.remove('touch-active');
-
-  // Let the browser handle the 'click' event naturally.
-}
-
-// Backup click handler (kept for non-touch devices or potential fallbacks)
-function handleButtonClick(e) {
-  // This provides a backup for when touch events fail
-  // Most browsers use this for non-touch interactions
-  // Some mobile browsers may fall back to this for touch as well
-
-  // Check if this is already handled by touch events (less likely now, but keep check)
-  if (touchEnabled && e.pointerType === 'touch') {
-    return; 
-  }
-
-  // Add the active state briefly for non-touch clicks
-  this.classList.add('touch-active');
-  setTimeout(() => {
-    this.classList.remove('touch-active');
-  }, 150);
 }
 
 // ------ Modal Functions ------
@@ -943,14 +931,6 @@ function startGame() {
                 clueDisplay.classList.remove('hidden');
                 floatingUI.classList.remove('hidden');
                 
-                // Add hunt-mode class to body for mobile UI optimization
-                document.body.classList.add('hunt-mode');
-                
-                // Add UI toggle button for mobile
-                if (window.innerWidth <= 768) {
-                    addUiToggleButton();
-                }
-                
                 // Reset game state
                 foundCount = 0;
                 currentEggIndex = 0;
@@ -967,41 +947,10 @@ function startGame() {
     }, 100); // Update every 100ms for a smoother animation
 }
 
-// Add UI toggle button for mobile devices
-function addUiToggleButton() {
-    // Remove any existing UI toggle button
-    const existingToggle = document.querySelector('.ui-toggle');
-    if (existingToggle) {
-        existingToggle.remove();
-    }
-    
-    // Create toggle button
-    const uiToggle = document.createElement('button');
-    uiToggle.className = 'ui-toggle';
-    uiToggle.innerHTML = '👁️';
-    uiToggle.title = 'Toggle UI visibility';
-    
-    // Add click handler
-    uiToggle.addEventListener('click', toggleUiVisibility);
-    
-    // Add to the document
-    document.body.appendChild(uiToggle);
-}
-
-// Toggle UI visibility
-function toggleUiVisibility() {
-    const body = document.body;
-    if (body.classList.contains('ui-hidden')) {
-        // Show UI
-        body.classList.remove('ui-hidden');
-        document.querySelector('.ui-toggle').innerHTML = '👁️';
-    } else {
-        // Hide UI
-        body.classList.add('ui-hidden');
-        document.querySelector('.ui-toggle').innerHTML = '👁️‍🗨️';
-    }
-}
-
+/**
+ * Create game eggs with corrected position calculations to avoid scaling issues
+ * The issue was that eggs positioned farther from center had greater offsets
+ */
 function createGameEggs() {
     // Clear game container
     gameContainer.innerHTML = '';
@@ -1337,16 +1286,6 @@ function resetGame() {
     clueDisplay.classList.add('hidden');
     floatingUI.classList.add('hidden');
     setupScreen.classList.remove('hidden');
-    
-    // Remove hunt-mode class when exiting game
-    document.body.classList.remove('hunt-mode');
-    document.body.classList.remove('ui-hidden');
-    
-    // Remove UI toggle button
-    const uiToggle = document.querySelector('.ui-toggle');
-    if (uiToggle) {
-        uiToggle.remove();
-    }
     
     // Reset UI style
     floatingUI.style.backgroundColor = 'rgba(255, 255, 255, 0.85)';
