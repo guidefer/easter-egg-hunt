@@ -338,7 +338,7 @@ const modalEggNumber = document.getElementById('modal-egg-number');
 const modalEggClue = document.getElementById('modal-egg-clue');
 
 // Setup buttons
-document.getElementById('setup-btn').addEventListener('click', showSetupScreen);
+document.getElementById('setup-btn').addEventListener('click', startSetupWithLoading);
 document.getElementById('add-egg-btn').addEventListener('click', showAddEggModal);
 document.getElementById('start-game-btn').addEventListener('click', startGame);
 document.getElementById('reset-btn').addEventListener('click', resetGame);
@@ -883,26 +883,47 @@ function startGame() {
     // Initialize sounds on user interaction
     initSounds();
     
+    // Show loading screen
+    const loadingScreen = document.getElementById('loading-screen');
+    loadingScreen.classList.remove('hidden');
+    
     // Sort eggs by number to ensure sequential order
     eggData.sort((a, b) => a.number - b.number);
     
-    // Hide setup screen and show game screen
-    setupScreen.classList.add('hidden');
-    gameContainer.classList.remove('hidden');
-    clueDisplay.classList.remove('hidden');
-    floatingUI.classList.remove('hidden');
-    
-    // Reset game state
-    foundCount = 0;
-    currentEggIndex = 0;
-    foundCountElement.textContent = foundCount;
-    totalCountElement.textContent = eggData.length;
-    
-    // Create eggs in the game container
-    createGameEggs();
-    
-    // Show first clue
-    showCurrentClue();
+    // Simulate loading process
+    let progress = 0;
+    const loadingBar = document.getElementById('loading-bar');
+    const loadingInterval = setInterval(() => {
+        progress += 5;
+        loadingBar.style.width = `${progress}%`;
+        
+        if (progress >= 100) {
+            clearInterval(loadingInterval);
+            
+            // Hide loading screen and show game screen after a small delay
+            setTimeout(() => {
+                loadingScreen.classList.add('hidden');
+                
+                // Hide setup screen and show game screen
+                setupScreen.classList.add('hidden');
+                gameContainer.classList.remove('hidden');
+                clueDisplay.classList.remove('hidden');
+                floatingUI.classList.remove('hidden');
+                
+                // Reset game state
+                foundCount = 0;
+                currentEggIndex = 0;
+                foundCountElement.textContent = foundCount;
+                totalCountElement.textContent = eggData.length;
+                
+                // Create eggs in the game container
+                createGameEggs();
+                
+                // Show first clue
+                showCurrentClue();
+            }, 300);
+        }
+    }, 100); // Update every 100ms for a smoother animation
 }
 
 /**
@@ -1825,4 +1846,32 @@ function createCelebratingBunny(leftPos, topPos) {
       }, 500);
     }
   }, Math.random() * 2000 + 2000); // Random duration between 2-4 seconds
+}
+
+// ------ Setup Loading Function ------
+
+// Start setup with loading animation
+function startSetupWithLoading() {
+    // Show loading screen
+    startScreen.classList.add('hidden');
+    const setupLoadingScreen = document.getElementById('setup-loading-screen');
+    setupLoadingScreen.classList.remove('hidden');
+    
+    // Simulate loading process
+    let progress = 0;
+    const loadingBar = document.getElementById('setup-loading-bar');
+    const loadingInterval = setInterval(() => {
+        progress += 10; // Faster progress for setup
+        loadingBar.style.width = `${progress}%`;
+        
+        if (progress >= 100) {
+            clearInterval(loadingInterval);
+            
+            // Hide loading screen and show setup screen
+            setTimeout(() => {
+                setupLoadingScreen.classList.add('hidden');
+                showSetupScreen();
+            }, 300);
+        }
+    }, 80); // Slightly faster update for setup
 }
