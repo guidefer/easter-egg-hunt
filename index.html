@@ -1,0 +1,147 @@
+<!-- Easter Egg Hunt Game -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easter Egg Hunt</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="easter-background"></div>
+    
+    <!-- Start Screen -->
+    <div id="start-screen" class="screen">
+        <h1>Easter Egg Hunt</h1>
+        <p>Hide eggs around your living room for the kids to find!</p>
+        <div class="easter-decoration">🐰 🥚 🐣</div>
+        <button id="setup-btn" class="main-btn">Setup Hunt</button>
+    </div>
+    
+    <!-- Setup Screen for egg placement -->
+    <div id="setup-screen" class="screen hidden">
+        <div id="setup-container">
+            <div id="egg-placement-area">
+                <!-- The living room image will be here -->
+            </div>
+            
+            <div id="setup-controls">
+                <h2>Easter Egg Hunt Setup</h2>
+                
+                <div class="instructions">
+                    <p>Click anywhere on the room to place eggs, or click "Add Egg" below.</p>
+                    <p>Click on existing eggs to edit their clues.</p>
+                    <p>Drag eggs to reposition them.</p>
+                </div>
+                
+                <!-- Background selector -->
+                <div class="form-group">
+                    <label for="background-options">Custom Background:</label>
+                    <div class="background-controls">
+                        <input type="file" id="background-upload" class="custom-file-input hidden" accept="image/*">
+                        <button id="file-upload-btn" class="control-btn" title="Upload an image">📂</button>
+                        <button id="camera-capture" class="control-btn" title="Take a picture with camera">📷</button>
+                    </div>
+                    <p class="helper-text">Upload an image or take a photo for your hunt</p>
+                </div>
+                
+                <div class="button-group">
+                    <button id="add-egg-btn" class="control-btn">Add Egg</button>
+                </div>
+                
+                <h3>Your Eggs</h3>
+                <div id="egg-list-container">
+                    <ul id="egg-list"></ul>
+                </div>
+                
+                <div class="button-group">
+                    <button id="start-game-btn" class="main-btn" disabled>Start the Hunt! (0 eggs)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Egg Edit Modal Dialog -->
+    <div id="egg-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Egg Details</h3>
+            
+            <div class="form-group">
+                <label for="modal-egg-number">Egg Number:</label>
+                <input type="number" id="modal-egg-number" min="1" value="1">
+            </div>
+            
+            <div class="form-group">
+                <label for="modal-egg-clue">Clue Text:</label>
+                <textarea id="modal-egg-clue" rows="3" placeholder="Enter a clue for this egg"></textarea>
+            </div>
+            
+            <div class="button-group">
+                <button id="modal-save-btn">Save Changes</button>
+                <button id="modal-remove-btn">Remove Egg</button>
+                <button id="modal-cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Congratulations Modal -->
+    <div id="congrats-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Congratulations!</h3>
+            <div class="easter-decoration">🎉 🐰 🥚 🎊</div>
+            <p id="congrats-message">You found all the eggs! Great job!</p>
+            <div class="button-group">
+                <button id="restart-btn" class="main-btn">Play Again</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Game Screen -->
+    <div id="game-container" class="screen hidden">
+        <!-- Clickable egg areas will be added here by script.js -->
+    </div>
+    
+    <!-- Clue display -->
+    <div id="clue-display" class="hidden">
+        <h3>Find this egg:</h3>
+        <p id="current-clue"></p>
+        <div class="clue-counter">Clue <span id="clue-number">1</span> of <span id="total-clues">0</span></div>
+        <button id="hint-button" class="control-btn">Need a Hint?</button>
+    </div>
+    
+    <!-- Floating UI -->
+    <div id="floating-ui" class="hidden">
+        <h2>Easter Egg Hunt!</h2>
+        <div id="score">Eggs found: <span id="found-count">0</span>/<span id="total-count">0</span></div>
+        <button id="reset-btn">Reset Hunt</button>
+        <div class="easter-decoration">🐰 🥚 🐣</div>
+    </div>
+    
+    <!-- Camera Modal -->
+    <div id="camera-modal" class="hidden">
+        <div class="camera-container">
+            <video id="camera-preview" autoplay playsinline></video>
+            <canvas id="camera-canvas" class="hidden"></canvas>
+        </div>
+        <div class="camera-controls">
+            <button id="capture-photo">Take Photo</button>
+            <button id="cancel-camera">Cancel</button>
+        </div>
+    </div>
+    
+    <!-- Audio controls -->
+    <div id="audio-controls" class="audio-controls hidden">
+        <button id="play-pause-btn" title="Play/Pause Background Music">▶️</button>
+        <input type="range" id="volume-slider" class="volume-slider" min="0" max="100" value="50">
+        <button id="next-track-btn" title="Next Track">⏭️</button>
+    </div>
+    
+    <!-- Hidden audio elements -->
+    <audio id="background-music" loop></audio>
+    <audio id="egg-found-sound"></audio>
+    <audio id="hint-sound"></audio>
+    <audio id="celebration-sound"></audio>
+    
+    <script src="script.js"></script>
+</body>
+</html>

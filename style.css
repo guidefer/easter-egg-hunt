@@ -1,0 +1,1013 @@
+/* Set up the background image and basic layout */
+body, html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    overflow: hidden;
+    touch-action: manipulation; /* Prevents double-tap zooming on touch devices */
+}
+
+/* Easter-themed background */
+#easter-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(120deg, #ffcce6, #f9e9f9, #e6f9ff, #f9fff0, #fff1cc);
+    background-size: 1000% 1000%;
+    animation: gradientBG 15s ease infinite;
+    z-index: -2;
+}
+
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Common styles for all screens */
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.5s ease;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Start Screen */
+#start-screen {
+    text-align: center;
+    padding: 20px;
+}
+
+#start-screen h1 {
+    font-size: 3em;
+    color: #ff66b3;
+    text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.6);
+    margin-bottom: 20px;
+}
+
+#start-screen p {
+    font-size: 1.5em;
+    color: #8855dd;
+    margin-bottom: 30px;
+}
+
+/* Setup Screen */
+#setup-screen {
+    padding: 0;
+    overflow: hidden;
+}
+
+#setup-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+#egg-placement-area {
+    flex: 1;
+    height: 100%;
+    position: relative;
+    cursor: crosshair;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    cursor: pointer;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    background-color: #f9f9f9;
+    overflow: hidden;
+    /* Using CSS background-image properties instead of an img element */
+    background-repeat: no-repeat;
+    background-size: contain; /* Changed from 'cover' to 'contain' to show full image height */
+    background-position: center;
+    z-index: 1; /* Ensure it's above the easter background but below eggs */
+}
+
+#setup-controls {
+    width: 300px;
+    height: 100%;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.8);
+    overflow-y: auto;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+#setup-controls h2 {
+    color: #ff66b3;
+    margin-top: 0;
+}
+
+#setup-controls h3 {
+    color: #8855dd;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+#egg-list-container {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    border: 1px solid #ffcccc;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+#egg-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#egg-list li {
+    padding: 8px 10px;
+    margin-bottom: 5px;
+    background: #f9e9f9;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+#egg-list li:hover {
+    background: #ffcce6;
+}
+
+#egg-list li.selected {
+    background: #ffcccc;
+    border: 1px solid #ff99cc;
+}
+
+#egg-editor {
+    margin-bottom: 20px;
+}
+
+#egg-editor label {
+    display: block;
+    margin-top: 10px;
+    color: #8855dd;
+}
+
+#egg-editor input, 
+#egg-editor textarea {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ffcccc;
+    border-radius: 4px;
+    font-family: inherit;
+}
+
+#egg-editor button {
+    margin-top: 10px;
+    margin-right: 5px;
+    padding: 5px 10px;
+    background: #ffcccc;
+    border: 1px solid #ff99cc;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+#egg-editor button:hover:not([disabled]) {
+    background: #ff99cc;
+    color: white;
+}
+
+#egg-editor button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Instructions in setup */
+.instructions {
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border-left: 4px solid #ff99cc;
+}
+
+.instructions p {
+    margin: 5px 0;
+    font-size: 0.9em;
+    color: #8855dd;
+}
+
+/* Button group styling */
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 10px;
+}
+
+/* Clue counter */
+.clue-counter {
+    font-size: 0.8em;
+    color: #8855dd;
+    margin-top: 10px;
+    border-top: 1px dashed #ffcccc;
+    padding-top: 5px;
+}
+
+/* Game container styles */
+#game-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 10;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    background-color: #f9f9f9;
+    /* Using CSS background-image properties instead of an img element */
+    background-repeat: no-repeat;
+    background-size: contain; /* Changed from 'cover' to 'contain' to show full image height */
+    background-position: center;
+}
+
+/* Draggable eggs for setup */
+.setup-egg {
+    position: absolute;
+    width: 48px; /* Standardize width to match game eggs */
+    height: 48px; /* Standardize height to match game eggs */
+    background: none;
+    cursor: move;
+    user-select: none;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    visibility: visible !important; /* Ensure eggs are always visible in setup mode */
+    font-size: 32px; /* Size for the emoji */
+    filter: drop-shadow(0px 0px 3px white) drop-shadow(0px 0px 5px rgba(0,0,0,0.5));
+    /* No transform - position is absolute with left/top being the top-left corner */
+    margin: 0;
+    padding: 0;
+}
+
+/* Add white circular background to the eggs */
+.setup-egg::before {
+    content: '🐰'; /* Use bunny emoji instead of egg */
+    position: relative;
+    z-index: 2;
+}
+
+/* Add a white circle behind the egg for better visibility */
+.setup-egg::after {
+    content: attr(data-number);
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: #ff66b3;
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 3;
+}
+
+/* Add white circular background - increased size for better breathing room */
+.setup-egg::before {
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    width: 48px; /* Increased from 44px to 48px */
+    height: 48px; /* Increased from 44px to 48px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+}
+
+/* Eggs in game */
+.egg {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    background: none;
+    cursor: pointer !important;
+    opacity: 0.85;
+    border: none;
+    background-color: transparent;
+    transition: transform 0.3s ease, opacity 0.5s ease;
+    z-index: 1000 !important;
+    pointer-events: auto !important;
+    font-size: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0px 0px 3px white) drop-shadow(0px 0px 5px rgba(0,0,0,0.5));
+    animation: bobble 3s infinite ease-in-out;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+    /* No transform - position is absolute with left/top being the top-left corner */
+    margin: 0;
+    padding: 0;
+}
+
+/* Add checkmark to found eggs */
+.egg.found::after {
+    content: '✅';
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    font-size: 16px;
+    filter: drop-shadow(0px 0px 2px white);
+}
+
+/* Different bob animations for each egg to make them feel more lively */
+.egg:nth-child(odd) {
+    animation-delay: 0.3s;
+}
+
+.egg:nth-child(3n) {
+    animation-delay: 0.6s;
+}
+
+.egg:nth-child(3n+1) {
+    animation-delay: 0.9s;
+}
+
+@keyframes bobble {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.egg:hover {
+    transform: scale(1.2);
+    cursor: pointer !important;
+    animation: none;
+}
+
+/* New egg highlight */
+.new-egg {
+    animation: newEggPulse 1.5s ease-in-out 2;
+    filter: drop-shadow(0px 0px 5px #ff66b3) drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.8));
+}
+
+/* New egg highlight - pink gradient background instead of just white */
+.new-egg::before {
+    background: radial-gradient(circle, rgba(255,204,230,0.9) 0%, rgba(255,255,255,0.7) 100%);
+    box-shadow: 0 0 8px rgba(255, 102, 179, 0.6);
+}
+
+/* Enhanced new egg pulse animation */
+@keyframes newEggPulse {
+    0% { transform: scale(1); filter: drop-shadow(0px 0px 5px #ff66b3) drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.8)); }
+    50% { transform: scale(1.2); filter: drop-shadow(0px 0px 10px #ff66b3) drop-shadow(0px 0px 15px rgba(255, 255, 255, 0.9)); }
+    100% { transform: scale(1); filter: drop-shadow(0px 0px 5px #ff66b3) drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.8)); }
+}
+
+/* Egg animation variations */
+@keyframes bobble {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes wiggle {
+    0%, 100% { transform: rotate(-5deg); }
+    50% { transform: rotate(5deg); }
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-8px); }
+    60% { transform: translateY(-8px); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* Apply different animations to eggs based on their index */
+.egg.animation-bobble {
+    animation: bobble 3s infinite ease-in-out;
+}
+
+.egg.animation-spin {
+    animation: spin 8s infinite linear;
+}
+
+.egg.animation-wiggle {
+    animation: wiggle 2s infinite ease-in-out;
+}
+
+.egg.animation-bounce {
+    animation: bounce 2.5s infinite ease-in-out;
+}
+
+.egg.animation-pulse {
+    animation: pulse 3s infinite ease-in-out;
+}
+
+/* Dynamic background elements */
+.background-bunny {
+    position: absolute;
+    font-size: 32px;
+    z-index: 2;
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.7));
+    pointer-events: none;
+}
+
+@keyframes hop-across {
+    0% { transform: translateX(-50px) translateY(0); }
+    20% { transform: translateX(calc(20vw - 50px)) translateY(-20px); }
+    40% { transform: translateX(calc(40vw - 50px)) translateY(0); }
+    60% { transform: translateX(calc(60vw - 50px)) translateY(-20px); }
+    80% { transform: translateX(calc(80vw - 50px)) translateY(0); }
+    100% { transform: translateX(calc(100vw + 50px)) translateY(-10px); }
+}
+
+/* Audio player styles */
+.audio-controls {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 2px solid #ffcccc;
+    border-radius: 30px;
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    z-index: 1001;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.audio-controls button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    margin: 0 5px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.audio-controls button:hover {
+    transform: scale(1.1);
+}
+
+.audio-controls .volume-slider {
+    width: 60px;
+    margin: 0 5px;
+}
+
+/* Button styles */
+.main-btn {
+    padding: 15px 30px;
+    font-size: 1.2em;
+    background: #ffcccc;
+    border: 2px solid #ff99cc;
+    border-radius: 10px;
+    color: #cc6699;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 20px;
+}
+
+.main-btn:hover {
+    background: #ff99cc;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Clue display */
+#clue-display {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    border: 3px solid #ffcccc;
+    z-index: 100;
+    max-width: 300px;
+    animation: appear 0.5s ease-out;
+    transform-origin: top left;
+}
+
+@keyframes appear {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* Highlighted clue when new clue appears */
+.highlight-clue {
+    animation: highlight 1s ease;
+}
+
+@keyframes highlight {
+    0% { background-color: rgba(255, 255, 200, 0.9); }
+    100% { background-color: rgba(255, 255, 255, 0.9); }
+}
+
+/* Floating UI styles */
+#floating-ui {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    animation: float 3s ease-in-out infinite;
+    border: 3px solid #ffcccc;
+    z-index: 100;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+#floating-ui h2 {
+    margin-top: 0;
+    color: #ff66b3;
+    text-shadow: 1px 1px 2px rgba(255, 102, 179, 0.3);
+}
+
+.easter-decoration {
+    font-size: 24px;
+    margin: 10px 0;
+    letter-spacing: 5px;
+}
+
+#score {
+    margin: 10px 0;
+    font-size: 1.2em;
+    color: #8855dd;
+}
+
+#reset-btn {
+    margin: 10px 0;
+    padding: 8px 16px;
+    font-size: 1em;
+    cursor: pointer;
+    background: #ffcccc;
+    border: 2px solid #ff99cc;
+    border-radius: 10px;
+    color: #cc6699;
+    transition: all 0.3s;
+}
+
+#reset-btn:hover {
+    background: #ff99cc;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Sound toggle button */
+.icon-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.8);
+    border: 2px solid #ffcccc;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1001;
+    transition: all 0.3s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.icon-button:hover {
+    transform: scale(1.1);
+    background: #ffcccc;
+}
+
+/* Modal Dialog */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px 25px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 400px;
+    animation: modalAppear 0.3s ease;
+    border: 3px solid #ffcccc;
+    text-align: center; /* Center all content */
+}
+
+@keyframes modalAppear {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.modal h3 {
+    color: #ff66b3;
+    margin-top: 0;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #8855dd;
+    font-weight: bold;
+    color: #553366;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ffcccc;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1em;
+}
+
+.control-input {
+    width: 100%;
+    padding: 8px;
+    border: 2px solid #ffcccc;
+    border-radius: 5px;
+    background-color: #fff;
+    font-size: 1em;
+}
+
+.control-input[type="file"] {
+    padding: 8px 0;
+    cursor: pointer;
+}
+
+.helper-text {
+    font-size: 0.8em;
+    color: #8855dd;
+    margin-top: 4px;
+    margin-bottom: 0;
+    font-style: italic;
+}
+
+#background-select {
+    cursor: pointer;
+}
+
+/* Control buttons */
+.control-btn {
+    padding: 10px 15px;
+    background: #ffcccc;
+    border: 2px solid #ff99cc;
+    border-radius: 8px;
+    color: #cc6699;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 1em;
+}
+
+.control-btn:hover {
+    background: #ff99cc;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Modal buttons to match game style */
+#modal-save-btn, #modal-remove-btn, #modal-cancel-btn {
+    padding: 10px 15px;
+    background: #ffcccc;
+    border: 2px solid #ff99cc;
+    border-radius: 8px;
+    color: #cc6699;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 1em;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+
+#modal-save-btn:hover, #modal-remove-btn:hover, #modal-cancel-btn:hover {
+    background: #ff99cc;
+    color: white;
+    transform: scale(1.05);
+}
+
+#modal-save-btn {
+    background: #ccffcc;
+    border-color: #99cc99;
+    color: #669966;
+}
+
+#modal-save-btn:hover {
+    background: #99cc99;
+    color: white;
+}
+
+#modal-remove-btn {
+    background: #ffcccc;
+    border-color: #cc9999;
+    color: #cc6666;
+}
+
+#modal-remove-btn:hover {
+    background: #cc9999;
+    color: white;
+}
+
+#congrats-modal .easter-decoration {
+    font-size: 28px; /* Slightly larger decoration */
+    margin: 15px 0;
+    letter-spacing: 3px;
+}
+
+#congrats-modal p {
+    font-size: 1.2em;
+    margin: 15px 0;
+    color: #8855dd;
+}
+
+#restart-btn {
+    margin: 20px auto; /* Center button with auto margins */
+    display: block; /* Make button a block element for proper centering */
+}
+
+/* Responsive design improvements */
+@media (max-width: 768px) {
+    #setup-container {
+        flex-direction: column;
+    }
+    
+    #setup-controls {
+        width: 100%;
+        height: auto;
+        max-height: 50vh;
+    }
+    
+    #egg-placement-area {
+        height: 50vh;
+    }
+    
+    .icon-button {
+        bottom: 70px;
+    }
+    
+    /* Mobile-specific improvements */
+    #clue-display {
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        max-width: none;
+        width: calc(100% - 20px);
+        font-size: 0.9em;
+        padding: 10px;
+    }
+    
+    #floating-ui {
+        top: auto;
+        bottom: 10px;
+        right: 10px;
+        left: 10px;
+        width: calc(100% - 20px);
+        padding: 10px;
+        font-size: 0.9em;
+        animation: none; /* Remove floating animation on mobile */
+    }
+    
+    .modal-content {
+        width: 95%;
+        padding: 15px;
+    }
+    
+    /* Make buttons larger on touch screens */
+    .control-btn, .main-btn, #modal-save-btn, #modal-remove-btn, #modal-cancel-btn {
+        padding: 12px 20px;
+        min-height: 44px; /* Minimum touch target size */
+    }
+    
+    /* Increase egg size for easier tapping */
+    .egg, .setup-egg {
+        width: 56px;
+        height: 56px;
+        font-size: 36px;
+    }
+    
+    .egg::before, .setup-egg::before {
+        width: 56px;
+        height: 56px;
+    }
+    
+    /* Ensure forms are usable on mobile */
+    input, textarea, button {
+        font-size: 16px; /* Prevents iOS zoom on focus */
+    }
+}
+
+/* For even smaller screens (phones) */
+@media (max-width: 480px) {
+    #start-screen h1 {
+        font-size: 2em;
+    }
+    
+    #start-screen p {
+        font-size: 1.2em;
+    }
+    
+    .main-btn {
+        padding: 12px 18px;
+        font-size: 1em;
+    }
+    
+    /* Stack buttons on very small screens */
+    .button-group {
+        flex-direction: column;
+    }
+}
+
+/* Enhance active states for touch interactions */
+.egg:active, .setup-egg:active, .main-btn:active, .control-btn:active {
+    transform: scale(0.95);
+}
+
+/* Custom file input styling */
+.custom-file-input {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background-color: #ffcccc;
+    border: 2px solid #ff99cc;
+    border-radius: 8px;
+    color: #cc6699;
+    cursor: pointer;
+    padding: 8px;
+    transition: all 0.3s;
+}
+
+/* Adding styles for the camera functionality */
+.background-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Matching styles for file upload and camera buttons */
+#camera-capture, #file-upload-btn {
+  padding: 5px 10px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  background-color: #f9f3f3;
+  border: 1px solid #e6c0c0;
+  border-radius: 4px;
+}
+
+#camera-capture:hover, #file-upload-btn:hover {
+  background-color: #ffcccc;
+}
+
+/* Camera modal styles */
+#camera-modal {
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.camera-container {
+  position: relative;
+  max-width: 90%;
+  max-height: 70vh;
+  margin-bottom: 20px;
+}
+
+#camera-preview {
+  max-width: 100%;
+  max-height: 70vh;
+  border: 3px solid white;
+  border-radius: 8px;
+}
+
+.camera-controls {
+  display: flex;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.camera-controls button {
+  padding: 10px 20px;
+  background: #fff;
+  border: 2px solid #ffcccc;
+  border-radius: 30px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.camera-controls button:hover {
+  background: #ffcccc;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Styling for the background image */
+.background-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Changed from contain to cover for better filling */
+    z-index: 0; /* Behind other elements */
+    max-width: none; /* Allow image to scale beyond container width if needed */
+    max-height: 100%; /* Limit height to container height */
+    margin: 0 auto;
+}
+
+/* Pawprint trail styling */
+.pawprint {
+    position: absolute;
+    font-size: 16px;
+    color: rgba(139, 69, 19, 0.8); /* Brown color for pawprints */
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.7));
+    z-index: 500;
+    pointer-events: none;
+}
+
+/* Animation for pawprint fade-in */
+@keyframes fadeInPawprint {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.5) rotate(var(--rotation)); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(var(--rotation)); }
+}
+
+/* Hint button styling */
+#hint-button {
+  margin-top: 10px;
+  background: #ffeecc;
+  border: 2px solid #ffcc99;
+  color: #cc6633;
+  padding: 8px 15px;
+  font-size: 1em;
+  transition: all 0.3s;
+  width: 100%;
+}
+
+#hint-button:hover {
+  background: #ffcc99;
+  color: #994400;
+  transform: scale(1.05);
+}
+
+#hint-button.used {
+  background: #f9e9f9;
+  border-color: #dd99dd;
+  color: #8855dd;
+}
