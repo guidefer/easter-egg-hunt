@@ -14,7 +14,7 @@ let currentBackground = 'Living-room.png'; // Track the current background image
 let touchEnabled = 'ontouchstart' in window; // Detect if device supports touch
 
 // Game version - update this when making significant changes
-const GAME_VERSION = '1.2.0'; // Major.Minor.Patch format
+const GAME_VERSION = '1.3.0'; // Major.Minor.Patch format
 
 // Sound effects using the Web Audio API
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
