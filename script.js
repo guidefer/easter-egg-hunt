@@ -419,30 +419,26 @@ function initFastClick() {
 // Fix button touch support across all browsers
 function fixButtonTouchSupport() {
   console.log('Fixing button touch support');
-  
+
   // Select all interactive elements
   const buttons = document.querySelectorAll('button, .main-btn, .control-btn, .egg, .setup-egg, .more-settings-toggle');
-  
+
   buttons.forEach(button => {
     // Clean up any existing listeners to prevent duplicates
     button.removeEventListener('touchstart', handleTouchStart);
     button.removeEventListener('touchend', handleTouchEnd);
-    button.removeEventListener('click', handleButtonClick);
-    
+
     // Explicitly make sure the element is clickable 
     button.style.cursor = 'pointer';
     button.style.webkitTouchCallout = 'none'; // Disable callout on iOS
     button.style.webkitUserSelect = 'none'; // Disable selection on iOS
-    
-    // Add touch listeners with proper event options
+
+    // Add touch listeners primarily for visual feedback
     button.addEventListener('touchstart', handleTouchStart, { passive: true });
-    button.addEventListener('touchend', handleTouchEnd, { passive: false });
-    
-    // Backup click handler for non-touch fallback or if touch doesn't work
-    button.addEventListener('click', handleButtonClick);
+    button.addEventListener('touchend', handleTouchEnd, { passive: true });
   });
-  
-  // Special handling for mobile game eggs
+
+  // Special handling for mobile game eggs - ensure pointer events are correct
   const gameEggs = document.querySelectorAll('.egg');
   gameEggs.forEach(egg => {
     // Ensure game eggs have appropriate styles and behaviors
@@ -453,92 +449,35 @@ function fixButtonTouchSupport() {
   });
 }
 
-// Touch start handler
+// Touch start handler - Adds visual feedback
 function handleTouchStart(e) {
   // Add active state class
   this.classList.add('touch-active');
-  
-  // Store touch position for later comparison
-  if (e.touches && e.touches[0]) {
-    this.dataset.touchStartX = e.touches[0].clientX;
-    this.dataset.touchStartY = e.touches[0].clientY;
-  }
 }
 
-// Touch end handler
+// Touch end handler - Removes visual feedback
 function handleTouchEnd(e) {
   // Get the element
   const element = this;
-  
-  // Remove touch-active state
+
+  // Remove touch-active state immediately
   element.classList.remove('touch-active');
 
-  // Check if this was a tap rather than a scroll/swipe
-  // by comparing start and end positions
-  const touchEndX = e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientX : null;
-  const touchEndY = e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientY : null;
-  const touchStartX = parseFloat(element.dataset.touchStartX || 0);
-  const touchStartY = parseFloat(element.dataset.touchStartY || 0);
-  
-  // Clear stored touch data
-  delete element.dataset.touchStartX;
-  delete element.dataset.touchStartY;
-  
-  // If movement was minimal (less than 10px), treat as a tap
-  if (touchEndX !== null && 
-      Math.abs(touchEndX - touchStartX) < 10 && 
-      Math.abs(touchEndY - touchStartY) < 10) {
-      
-    // Stop default actions for this event
-    e.preventDefault();
-    
-    // On Safari, sometimes we need to manually trigger the click
-    setTimeout(function() {
-      // Skip if this is a draggable egg
-      if (element.classList.contains('setup-egg') && draggedEgg) {
-        return;
-      }
-      
-      // Determine the action based on element properties
-      if (element.id === 'hint-button') {
-        showHint();
-      } 
-      else if (element.classList.contains('egg')) {
-        const eggIndex = parseInt(element.dataset.eggIndex || -1);
-        if (eggIndex === currentEggIndex) {
-          eggFound(element);
-        }
-      }
-      else if (typeof element.onclick === 'function') {
-        // Call the onclick handler directly
-        element.onclick();
-      }
-      else {
-        // Simulate a click event
-        const clickEvent = new MouseEvent('click', {
-          bubbles: true,
-          cancelable: true,
-          view: window
-        });
-        element.dispatchEvent(clickEvent);
-      }
-    }, 10);
-  }
+  // Let the browser handle the 'click' event naturally.
 }
 
-// Backup click handler
+// Backup click handler (kept for non-touch devices or potential fallbacks)
 function handleButtonClick(e) {
   // This provides a backup for when touch events fail
   // Most browsers use this for non-touch interactions
   // Some mobile browsers may fall back to this for touch as well
-  
-  // Check if this is already handled by touch events
+
+  // Check if this is already handled by touch events (less likely now, but keep check)
   if (touchEnabled && e.pointerType === 'touch') {
-    // Already handled by touch events
-    return;
+    return; 
   }
-  
-  // Add the active state briefly
+
+  // Add the active state briefly for non-touch clicks
   this.classList.add('touch-active');
   setTimeout(() => {
     this.classList.remove('touch-active');
