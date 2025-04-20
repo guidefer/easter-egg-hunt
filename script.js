@@ -14,7 +14,7 @@ let currentBackground = 'Living-room.png'; // Track the current background image
 let touchEnabled = 'ontouchstart' in window; // Detect if device supports touch
 
 // Game version - update this when making significant changes
-const GAME_VERSION = '1.2.0'; // Major.Minor.Patch format
+const GAME_VERSION = '1.3.0'; // Updated for mobile UI and button fixes
 
 // Sound effects using the Web Audio API
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -1004,6 +1004,14 @@ function startGame() {
                 clueDisplay.classList.remove('hidden');
                 floatingUI.classList.remove('hidden');
                 
+                // Add hunt-mode class to body for mobile UI optimization
+                document.body.classList.add('hunt-mode');
+                
+                // Add UI toggle button for mobile
+                if (window.innerWidth <= 768) {
+                    addUiToggleButton();
+                }
+                
                 // Reset game state
                 foundCount = 0;
                 currentEggIndex = 0;
@@ -1020,10 +1028,41 @@ function startGame() {
     }, 100); // Update every 100ms for a smoother animation
 }
 
-/**
- * Create game eggs with corrected position calculations to avoid scaling issues
- * The issue was that eggs positioned farther from center had greater offsets
- */
+// Add UI toggle button for mobile devices
+function addUiToggleButton() {
+    // Remove any existing UI toggle button
+    const existingToggle = document.querySelector('.ui-toggle');
+    if (existingToggle) {
+        existingToggle.remove();
+    }
+    
+    // Create toggle button
+    const uiToggle = document.createElement('button');
+    uiToggle.className = 'ui-toggle';
+    uiToggle.innerHTML = '👁️';
+    uiToggle.title = 'Toggle UI visibility';
+    
+    // Add click handler
+    uiToggle.addEventListener('click', toggleUiVisibility);
+    
+    // Add to the document
+    document.body.appendChild(uiToggle);
+}
+
+// Toggle UI visibility
+function toggleUiVisibility() {
+    const body = document.body;
+    if (body.classList.contains('ui-hidden')) {
+        // Show UI
+        body.classList.remove('ui-hidden');
+        document.querySelector('.ui-toggle').innerHTML = '👁️';
+    } else {
+        // Hide UI
+        body.classList.add('ui-hidden');
+        document.querySelector('.ui-toggle').innerHTML = '👁️‍🗨️';
+    }
+}
+
 function createGameEggs() {
     // Clear game container
     gameContainer.innerHTML = '';
@@ -1359,6 +1398,16 @@ function resetGame() {
     clueDisplay.classList.add('hidden');
     floatingUI.classList.add('hidden');
     setupScreen.classList.remove('hidden');
+    
+    // Remove hunt-mode class when exiting game
+    document.body.classList.remove('hunt-mode');
+    document.body.classList.remove('ui-hidden');
+    
+    // Remove UI toggle button
+    const uiToggle = document.querySelector('.ui-toggle');
+    if (uiToggle) {
+        uiToggle.remove();
+    }
     
     // Reset UI style
     floatingUI.style.backgroundColor = 'rgba(255, 255, 255, 0.85)';
