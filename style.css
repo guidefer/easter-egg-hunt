@@ -631,7 +631,6 @@ body, html {
 
 .icon-button:hover {
     transform: scale(1.1);
-    background: #ffcccc;
 }
 
 /* Modal Dialog */
@@ -708,7 +707,7 @@ body, html {
 }
 
 .helper-text {
-    font-size: 0.8em;
+    font-size: 0.7em;
     color: #8855dd;
     margin-top: 4px;
     margin-bottom: 0;
@@ -1260,4 +1259,231 @@ body, html {
     opacity: 0.9 !important;
     transition: transform 0.1s, opacity 0.1s !important;
     background-color: rgba(255, 153, 204, 0.8) !important;
+}
+
+/* Settings button in top right corner */
+.settings-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.8);
+    border: 2px solid #ffcccc;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 120;
+    transition: all 0.3s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    padding: 0; /* Remove padding to ensure centering works properly */
+    line-height: 1; /* Ensure line height doesn't affect vertical alignment */
+}
+
+.settings-btn:hover {
+    transform: scale(1.1) rotate(15deg);
+    background: #ffcccc;
+}
+
+/* Settings Modal Styling */
+#settings-modal .modal-content {
+    max-width: 450px;
+    padding: 25px 30px;
+    border-radius: 20px;
+    border: 2px solid #ff99cc;
+    background-color: #fff;
+    position: relative; /* Add this to make absolute positioning work correctly */
+}
+
+/* Close button for settings modal - fixed positioning */
+#settings-modal .close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #ffcccc;
+    border: none;
+    color: #ff66b3;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 10;
+    padding: 0; /* Remove any padding that might affect positioning */
+    line-height: 1; /* Fix line height to center the X character */
+}
+
+#settings-modal h2 {
+    color: #ff66b3;
+    text-align: center;
+    font-size: 1.8em;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+#settings-modal .settings-section {
+    border-top: 1px solid #ffcccc;
+    padding: 15px 0;
+    margin-bottom: 10px;
+}
+
+#settings-modal h3 {
+    color: #8855dd;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+/* Settings controls */
+.settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 15px 0;
+}
+
+.settings-row label {
+    color: #666;
+    font-size: 1.1em;
+}
+
+/* Volume slider */
+#settings-modal .volume-slider {
+    width: 150px;
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+#settings-modal .volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background: #ff66b3;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+#settings-modal .volume-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: #ff66b3;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
+/* Controls for music and sound */
+.controls-group {
+    display: flex;
+    gap: 10px;
+}
+
+#settings-modal .control-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background-color: #ffe6f2;
+    border: 2px solid #ff99cc;
+    color: #ff66b3;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#settings-modal .control-btn:hover {
+    background-color: #ff99cc;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Close button for settings modal */
+#settings-modal .close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #ffcccc;
+    border: none;
+    color: #ff66b3;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 10;
+}
+
+#settings-modal .close-btn:hover {
+    background-color: #ff99cc;
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Reorganized custom background section */
+.background-section {
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    padding: 12px 15px;
+}
+
+.background-section h3 {
+    color: #8855dd;
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-weight: normal;
+    font-size: 1.1em;
+}
+
+.background-section p {
+    color: #666;
+    font-size: 0.9em;
+    margin: 5px 0 10px;
+    font-style: italic;
+}
+
+.background-controls {
+    display: flex;
+    justify-content: flex-end; /* Align buttons to the right */
+    gap: 10px;
+    margin: 10px 0;
+}
+
+.background-controls .control-btn {
+    width: 50px;
+    height: 45px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    background-color: #ffe6f2;
+    border: 2px solid #ff99cc;
+    border-radius: 8px;
+}
+
+.helper-text {
+    font-size: 0.75em;
+    color: #888;
+    margin-top: 8px;
+    margin-bottom: 0;
+    font-style: italic;
+    text-align: center;
 }

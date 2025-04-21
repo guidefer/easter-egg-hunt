@@ -364,6 +364,9 @@ window.onload = function() {
   
   // Update version number in the UI
   updateVersionDisplay();
+  
+  // Initialize settings modal
+  initSettingsModal();
 };
 
 // Update version number in the UI
@@ -1349,8 +1352,8 @@ function initBackgroundUpload() {
   // Add explanation for users about local file handling
   const fileInfoText = document.createElement('div');
   fileInfoText.className = 'file-info';
-  fileInfoText.textContent = 'Images are processed locally and not uploaded to any server';
-  fileInfoText.style.fontSize = '0.8em';
+  fileInfoText.textContent = 'Upload your custom art or use the camera to take a photo!';
+  fileInfoText.style.fontSize = '0.9em';
   fileInfoText.style.opacity = '0.7';
   fileInfoText.style.marginTop = '4px';
   
@@ -2002,4 +2005,203 @@ function initMoreSettings() {
       }
     }
   }
+}
+
+// Settings Modal Functions
+function initSettingsModal() {
+    // Get DOM elements
+    const settingsModal = document.getElementById('settings-modal');
+    const settingsBtn = document.querySelectorAll('#settings-btn'); // Multiple buttons with same ID
+    const closeBtn = document.getElementById('settings-close-btn');
+    const volumeSlider = document.getElementById('settings-volume');
+    const playPauseBtn = document.getElementById('settings-play-pause');
+    const nextTrackBtn = document.getElementById('settings-next-track');
+    const soundToggleBtn = document.getElementById('settings-sound-toggle');
+    
+    // Set initial values based on current settings
+    if (volumeSlider) {
+        const backgroundMusic = document.getElementById('background-music');
+        if (backgroundMusic) {
+            volumeSlider.value = backgroundMusic.volume * 100;
+        } else {
+            // Default value if element doesn't exist yet
+            const savedVolume = localStorage.getItem('eggHuntVolume');
+            if (savedVolume !== null) {
+                volumeSlider.value = parseFloat(savedVolume) * 100;
+            }
+        }
+    }
+    
+    // Set initial button states
+    if (playPauseBtn) {
+        const backgroundMusic = document.getElementById('background-music');
+        playPauseBtn.textContent = backgroundMusic && !backgroundMusic.paused ? '⏸️' : '▶️';
+    }
+    
+    if (soundToggleBtn) {
+        soundToggleBtn.textContent = soundEnabled ? '🔊' : '🔇';
+    }
+    
+    // Add event listeners to settings buttons (may be multiple)
+    settingsBtn.forEach(btn => {
+        btn.addEventListener('click', openSettingsModal);
+    });
+    
+    // Close button event
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeSettingsModal);
+    }
+    
+    // Close on click outside modal content
+    if (settingsModal) {
+        settingsModal.addEventListener('click', function(e) {
+            if (e.target === settingsModal) {
+                closeSettingsModal();
+            }
+        });
+    }
+    
+    // Volume slider event
+    if (volumeSlider) {
+        volumeSlider.addEventListener('input', function(e) {
+            const volume = e.target.value / 100;
+            updateVolume(volume);
+        });
+    }
+    
+    // Play/Pause button event
+    if (playPauseBtn) {
+        playPauseBtn.addEventListener('click', function() {
+            togglePlayPause();
+            playPauseBtn.textContent = isPlaying() ? '⏸️' : '▶️';
+        });
+    }
+    
+    // Next track button event
+    if (nextTrackBtn) {
+        nextTrackBtn.addEventListener('click', function() {
+            SoundManager.nextTrack();
+        });
+    }
+    
+    // Sound toggle button event
+    if (soundToggleBtn) {
+        soundToggleBtn.addEventListener('click', function() {
+            soundEnabled = !soundEnabled;
+            soundToggleBtn.textContent = soundEnabled ? '🔊' : '🔇';
+            
+            // Update all other sound toggle buttons for consistency
+            const otherSoundToggles = document.querySelectorAll('[id^="sound-toggle"]');
+            otherSoundToggles.forEach(btn => {
+                if (btn !== soundToggleBtn) {
+                    btn.textContent = soundEnabled ? '🔊' : '🔇';
+                }
+            });
+        });
+    }
+}
+
+// Open the settings modal
+function openSettingsModal() {
+    const settingsModal = document.getElementById('settings-modal');
+    
+    // Before opening, update values to match current state
+    updateSettingsModalValues();
+    
+    // Show the modal
+    if (settingsModal) {
+        settingsModal.classList.remove('hidden');
+    }
+}
+
+// Close the settings modal
+function closeSettingsModal() {
+    const settingsModal = document.getElementById('settings-modal');
+    if (settingsModal) {
+        // Settings are applied immediately so no need for explicit save
+        settingsModal.classList.add('hidden');
+    }
+}
+
+// Update all values in the settings modal
+function updateSettingsModalValues() {
+    const volumeSlider = document.getElementById('settings-volume');
+    const playPauseBtn = document.getElementById('settings-play-pause');
+    const soundToggleBtn = document.getElementById('settings-sound-toggle');
+    
+    // Update volume slider
+    if (volumeSlider) {
+        const backgroundMusic = document.getElementById('background-music');
+        if (backgroundMusic) {
+            volumeSlider.value = backgroundMusic.volume * 100;
+        }
+    }
+    
+    // Update play/pause button
+    if (playPauseBtn) {
+        playPauseBtn.textContent = isPlaying() ? '⏸️' : '▶️';
+    }
+    
+    // Update sound toggle button
+    if (soundToggleBtn) {
+        soundToggleBtn.textContent = soundEnabled ? '🔊' : '🔇';
+    }
+}
+
+// Save settings
+function saveSettings() {
+    // Currently all settings are applied immediately
+    // This function could be expanded for future settings
+    closeSettingsModal();
+}
+
+// Helper for play/pause toggle
+function togglePlayPause() {
+    const backgroundMusic = document.getElementById('background-music');
+    if (!backgroundMusic) return;
+    
+    if (backgroundMusic.paused) {
+        backgroundMusic.play().catch(e => {
+            console.log('Failed to play background music, likely missing file');
+        });
+    } else {
+        backgroundMusic.pause();
+    }
+    
+    // Update all play/pause buttons for consistency
+    updateAllPlayPauseButtons();
+}
+
+// Check if music is playing
+function isPlaying() {
+    const backgroundMusic = document.getElementById('background-music');
+    return backgroundMusic && !backgroundMusic.paused;
+}
+
+// Update all play/pause buttons in the game
+function updateAllPlayPauseButtons() {
+    const isCurrentlyPlaying = isPlaying();
+    const playPauseButtons = document.querySelectorAll('[id$="play-pause"], [id$="play-pause-btn-setup"]');
+    
+    playPauseButtons.forEach(btn => {
+        btn.textContent = isCurrentlyPlaying ? '⏸️' : '▶️';
+    });
+}
+
+// Update volume across the game
+function updateVolume(volume) {
+    // Update the audio element
+    const backgroundMusic = document.getElementById('background-music');
+    if (backgroundMusic) {
+        backgroundMusic.volume = volume;
+    }
+    
+    // Save volume preference
+    localStorage.setItem('eggHuntVolume', volume);
+    
+    // Update all volume sliders for consistency
+    const volumeSliders = document.querySelectorAll('[id$="volume"], [id$="volume-slider-setup"]');
+    volumeSliders.forEach(slider => {
+        slider.value = volume * 100;
+    });
 }
