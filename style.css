@@ -96,24 +96,25 @@ body, html {
     height: 100%;
 }
 
-#egg-placement-area {
-    flex: 1;
-    height: 100%;
+/* Common styles for areas with backgrounds */
+#egg-placement-area, #game-container {
     position: relative;
-    cursor: crosshair;
-    width: 100%;
-    height: 100%;
-    position: relative;
-    cursor: pointer;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     background-color: #f9f9f9;
     overflow: hidden;
-    /* Using CSS background-image properties instead of an img element */
+    /* Using CSS background-image */
     background-repeat: no-repeat;
-    background-size: contain; /* Changed from 'cover' to 'contain' to show full image height */
+    background-size: contain;
     background-position: center;
-    z-index: 1; /* Ensure it's above the easter background but below eggs */
+}
+
+#egg-placement-area {
+    flex: 1;
+    height: 100%;
+    cursor: crosshair;
+    width: 100%;
+    z-index: 1; /* Above easter background but below eggs */
 }
 
 #setup-controls {
@@ -190,25 +191,28 @@ body, html {
     font-family: inherit;
 }
 
-#egg-editor button {
+/* Form input styles */
+.form-group input,
+.form-group textarea,
+#egg-editor input, 
+#egg-editor textarea,
+.control-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ffcccc;
+    border-radius: 5px;
+    font-family: inherit;
+    background-color: #fff;
+    font-size: 1em;
+}
+
+.form-group label,
+#egg-editor label {
+    display: block;
     margin-top: 10px;
-    margin-right: 5px;
-    padding: 5px 10px;
-    background: #ffcccc;
-    border: 1px solid #ff99cc;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-#egg-editor button:hover:not([disabled]) {
-    background: #ff99cc;
-    color: white;
-}
-
-#egg-editor button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    margin-bottom: 5px;
+    color: #8855dd;
+    font-weight: bold;
 }
 
 /* Instructions in setup */
@@ -250,43 +254,52 @@ body, html {
     height: 100%;
     overflow: hidden;
     z-index: 10;
-    border-radius: 10px;
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-    background-color: #f9f9f9;
-    /* Using CSS background-image properties instead of an img element */
-    background-repeat: no-repeat;
-    background-size: contain; /* Changed from 'cover' to 'contain' to show full image height */
-    background-position: center;
 }
 
-/* Draggable eggs for setup */
-.setup-egg {
+/* Common styles for all eggs */
+.egg, .setup-egg {
     position: absolute;
-    width: 48px; /* Standardize width to match game eggs */
-    height: 48px; /* Standardize height to match game eggs */
+    width: 48px;
+    height: 48px;
     background: none;
-    cursor: move;
-    user-select: none;
-    z-index: 5;
+    z-index: 1000;
     display: flex;
     align-items: center;
     justify-content: center;
-    visibility: visible !important; /* Ensure eggs are always visible in setup mode */
-    font-size: 32px; /* Size for the emoji */
+    font-size: 32px;
     filter: drop-shadow(0px 0px 3px white) drop-shadow(0px 0px 5px rgba(0,0,0,0.5));
-    /* No transform - position is absolute with left/top being the top-left corner */
     margin: 0;
     padding: 0;
 }
 
-/* Add white circular background to the eggs */
+/* Common styles for egg background */
+.egg::before, .setup-egg::before {
+    background-color: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+}
+
+/* Setup egg specific styles */
+.setup-egg {
+    cursor: move;
+    user-select: none;
+    z-index: 5;
+    visibility: visible !important; /* Ensure eggs are always visible in setup mode */
+}
+
 .setup-egg::before {
     content: '🐰'; /* Use bunny emoji instead of egg */
     position: relative;
     z-index: 2;
 }
 
-/* Add a white circle behind the egg for better visibility */
+/* Add egg number */
 .setup-egg::after {
     content: attr(data-number);
     background-color: rgba(255, 255, 255, 0.8);
@@ -306,43 +319,14 @@ body, html {
     z-index: 3;
 }
 
-/* Add white circular background - increased size for better breathing room */
-.setup-egg::before {
-    background-color: rgba(255, 255, 255, 0.7);
-    border-radius: 50%;
-    width: 48px; /* Increased from 44px to 48px */
-    height: 48px; /* Increased from 44px to 48px */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
-}
-
-/* Eggs in game */
+/* Game egg specific styles */
 .egg {
-    position: absolute;
-    width: 48px;
-    height: 48px;
-    background: none;
     cursor: pointer !important;
     opacity: 0.85;
     border: none;
     background-color: transparent;
     transition: transform 0.3s ease, opacity 0.5s ease;
-    z-index: 1000 !important;
-    pointer-events: auto !important;
-    font-size: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    filter: drop-shadow(0px 0px 3px white) drop-shadow(0px 0px 5px rgba(0,0,0,0.5));
     animation: bobble 3s infinite ease-in-out;
-    background-color: rgba(255, 255, 255, 0.7);
-    border-radius: 50%;
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
-    /* No transform - position is absolute with left/top being the top-left corner */
-    margin: 0;
-    padding: 0;
 }
 
 /* Add checkmark to found eggs */
@@ -368,11 +352,6 @@ body, html {
     animation-delay: 0.9s;
 }
 
-@keyframes bobble {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
-}
-
 .egg:hover {
     transform: scale(1.2);
     cursor: pointer !important;
@@ -391,14 +370,94 @@ body, html {
     box-shadow: 0 0 8px rgba(255, 102, 179, 0.6);
 }
 
-/* Enhanced new egg pulse animation */
-@keyframes newEggPulse {
-    0% { transform: scale(1); filter: drop-shadow(0px 0px 5px #ff66b3) drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.8)); }
-    50% { transform: scale(1.2); filter: drop-shadow(0px 0px 10px #ff66b3) drop-shadow(0px 0px 15px rgba(255, 255, 255, 0.9)); }
-    100% { transform: scale(1); filter: drop-shadow(0px 0px 5px #ff66b3) drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.8)); }
+/* Button styles - combined common properties */
+.main-btn,
+.control-btn,
+#modal-save-btn,
+#modal-remove-btn,
+#modal-cancel-btn,
+#hint-button,
+#restart-btn,
+#reset-btn {
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: inherit;
+    border: 2px solid #ff99cc;
+    background: #ffcccc;
+    color: #cc6699;
 }
 
-/* Egg animation variations */
+/* Button hover states */
+.main-btn:hover,
+.control-btn:hover,
+#modal-save-btn:hover,
+#modal-remove-btn:hover,
+#modal-cancel-btn:hover,
+#hint-button:hover,
+#restart-btn:hover,
+#reset-btn:hover {
+    background: #ff99cc;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Main button specific styles */
+.main-btn {
+    padding: 15px 30px;
+    font-size: 1.2em;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+/* Control button specific styles */
+.control-btn {
+    padding: 10px 15px;
+    font-size: 1em;
+}
+
+/* Special button variations */
+#modal-save-btn {
+    background: #ccffcc;
+    border-color: #99cc99;
+    color: #669966;
+}
+
+#modal-save-btn:hover {
+    background: #99cc99;
+}
+
+#modal-remove-btn {
+    background: #ffcccc;
+    border-color: #cc9999;
+    color: #cc6666;
+}
+
+#modal-remove-btn:hover {
+    background: #cc9999;
+}
+
+#hint-button {
+    margin-top: 10px;
+    background: #ffeecc;
+    border: 2px solid #ffcc99;
+    color: #cc6633;
+    padding: 8px 15px;
+    width: 100%;
+}
+
+#hint-button:hover {
+    background: #ffcc99;
+    color: #994400;
+}
+
+#hint-button.used {
+    background: #f9e9f9;
+    border-color: #dd99dd;
+    color: #8855dd;
+}
+
+/* Egg animation variations - combined keyframe declarations */
 @keyframes bobble {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-5px); }
@@ -425,34 +484,31 @@ body, html {
     50% { transform: scale(1.1); }
 }
 
-/* Apply different animations to eggs based on their index */
-.egg.animation-bobble {
-    animation: bobble 3s infinite ease-in-out;
+@keyframes newEggPulse {
+    0% { transform: scale(1); filter: drop-shadow(0px 0px 5px #ff66b3) drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.8)); }
+    50% { transform: scale(1.2); filter: drop-shadow(0px 0px 10px #ff66b3) drop-shadow(0px 0px 15px rgba(255, 255, 255, 0.9)); }
+    100% { transform: scale(1); filter: drop-shadow(0px 0px 5px #ff66b3) drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.8)); }
 }
 
-.egg.animation-spin {
-    animation: spin 8s infinite linear;
+@keyframes appear {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
 }
 
-.egg.animation-wiggle {
-    animation: wiggle 2s infinite ease-in-out;
+@keyframes highlight {
+    0% { background-color: rgba(255, 255, 200, 0.9); }
+    100% { background-color: rgba(255, 255, 255, 0.9); }
 }
 
-.egg.animation-bounce {
-    animation: bounce 2.5s infinite ease-in-out;
+@keyframes modalAppear {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
 }
 
-.egg.animation-pulse {
-    animation: pulse 3s infinite ease-in-out;
-}
-
-/* Dynamic background elements */
-.background-bunny {
-    position: absolute;
-    font-size: 32px;
-    z-index: 2;
-    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.7));
-    pointer-events: none;
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
 }
 
 @keyframes hop-across {
@@ -462,6 +518,27 @@ body, html {
     60% { transform: translateX(calc(60vw - 50px)) translateY(-20px); }
     80% { transform: translateX(calc(80vw - 50px)) translateY(0); }
     100% { transform: translateX(calc(100vw + 50px)) translateY(-10px); }
+}
+
+@keyframes fadeInPawprint {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.5) rotate(var(--rotation)); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(var(--rotation)); }
+}
+
+/* Apply different animations to eggs based on their class */
+.egg.animation-bobble { animation: bobble 3s infinite ease-in-out; }
+.egg.animation-spin { animation: spin 8s infinite linear; }
+.egg.animation-wiggle { animation: wiggle 2s infinite ease-in-out; }
+.egg.animation-bounce { animation: bounce 2.5s infinite ease-in-out; }
+.egg.animation-pulse { animation: pulse 3s infinite ease-in-out; }
+
+/* Dynamic background elements */
+.background-bunny {
+    position: absolute;
+    font-size: 32px;
+    z-index: 2;
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.7));
+    pointer-events: none;
 }
 
 /* Audio player styles */
@@ -501,25 +578,6 @@ body, html {
     margin: 0 5px;
 }
 
-/* Button styles */
-.main-btn {
-    padding: 15px 30px;
-    font-size: 1.2em;
-    background: #ffcccc;
-    border: 2px solid #ff99cc;
-    border-radius: 10px;
-    color: #cc6699;
-    cursor: pointer;
-    transition: all 0.3s;
-    margin-top: 20px;
-}
-
-.main-btn:hover {
-    background: #ff99cc;
-    color: white;
-    transform: scale(1.05);
-}
-
 /* Clue display */
 #clue-display {
     position: fixed;
@@ -537,19 +595,9 @@ body, html {
     transform-origin: top left;
 }
 
-@keyframes appear {
-    from { transform: scale(0.8); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-
 /* Highlighted clue when new clue appears */
 .highlight-clue {
     animation: highlight 1s ease;
-}
-
-@keyframes highlight {
-    0% { background-color: rgba(255, 255, 200, 0.9); }
-    100% { background-color: rgba(255, 255, 255, 0.9); }
 }
 
 /* Floating UI styles */
@@ -565,12 +613,6 @@ body, html {
     animation: float 3s ease-in-out infinite;
     border: 3px solid #ffcccc;
     z-index: 100;
-}
-
-@keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-    100% { transform: translateY(0px); }
 }
 
 #floating-ui h2 {
@@ -591,29 +633,9 @@ body, html {
     color: #8855dd;
 }
 
-#reset-btn {
-    margin: 10px 0;
-    padding: 8px 16px;
-    font-size: 1em;
-    cursor: pointer;
-    background: #ffcccc;
-    border: 2px solid #ff99cc;
-    border-radius: 10px;
-    color: #cc6699;
-    transition: all 0.3s;
-}
-
-#reset-btn:hover {
-    background: #ff99cc;
-    color: white;
-    transform: scale(1.05);
-}
-
-/* Sound toggle button */
-.icon-button {
+/* Circular buttons (icon buttons) */
+.icon-button, .settings-btn {
     position: fixed;
-    bottom: 20px;
-    right: 20px;
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -627,10 +649,28 @@ body, html {
     z-index: 1001;
     transition: all 0.3s;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    line-height: 1;
+    padding: 0;
 }
 
-.icon-button:hover {
+.icon-button:hover, .settings-btn:hover {
     transform: scale(1.1);
+}
+
+.icon-button {
+    bottom: 20px;
+    right: 20px;
+}
+
+.settings-btn {
+    top: 15px;
+    right: 15px;
+    z-index: 120;
+}
+
+.settings-btn:hover {
+    transform: scale(1.1) rotate(15deg);
+    background: #ffcccc;
 }
 
 /* Modal Dialog */
@@ -656,12 +696,7 @@ body, html {
     max-width: 400px;
     animation: modalAppear 0.3s ease;
     border: 3px solid #ffcccc;
-    text-align: center; /* Center all content */
-}
-
-@keyframes modalAppear {
-    from { transform: scale(0.8); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+    text-align: center;
 }
 
 .modal h3 {
@@ -674,107 +709,17 @@ body, html {
     margin-bottom: 15px;
 }
 
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    color: #8855dd;
-    font-weight: bold;
-    color: #553366;
-}
-
-.form-group input,
-.form-group textarea {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ffcccc;
-    border-radius: 8px;
-    font-family: inherit;
-    font-size: 1em;
-}
-
-.control-input {
-    width: 100%;
-    padding: 8px;
-    border: 2px solid #ffcccc;
-    border-radius: 5px;
-    background-color: #fff;
-    font-size: 1em;
-}
-
-.control-input[type="file"] {
-    padding: 8px 0;
-    cursor: pointer;
-}
-
 .helper-text {
-    font-size: 0.7em;
-    color: #8855dd;
-    margin-top: 4px;
+    font-size: 0.75em;
+    color: #888;
+    margin-top: 8px;
     margin-bottom: 0;
     font-style: italic;
+    text-align: center;
 }
 
 #background-select {
     cursor: pointer;
-}
-
-/* Control buttons */
-.control-btn {
-    padding: 10px 15px;
-    background: #ffcccc;
-    border: 2px solid #ff99cc;
-    border-radius: 8px;
-    color: #cc6699;
-    cursor: pointer;
-    transition: all 0.3s;
-    font-size: 1em;
-}
-
-.control-btn:hover {
-    background: #ff99cc;
-    color: white;
-    transform: scale(1.05);
-}
-
-/* Modal buttons to match game style */
-#modal-save-btn, #modal-remove-btn, #modal-cancel-btn {
-    padding: 10px 15px;
-    background: #ffcccc;
-    border: 2px solid #ff99cc;
-    border-radius: 8px;
-    color: #cc6699;
-    cursor: pointer;
-    transition: all 0.3s;
-    font-size: 1em;
-    font-family: 'Comic Neue Local', 'Comic Neue', 'Comic Sans MS', cursive, sans-serif;
-}
-
-#modal-save-btn:hover, #modal-remove-btn:hover, #modal-cancel-btn:hover {
-    background: #ff99cc;
-    color: white;
-    transform: scale(1.05);
-}
-
-#modal-save-btn {
-    background: #ccffcc;
-    border-color: #99cc99;
-    color: #669966;
-}
-
-#modal-save-btn:hover {
-    background: #99cc99;
-    color: white;
-}
-
-#modal-remove-btn {
-    background: #ffcccc;
-    border-color: #cc9999;
-    color: #cc6666;
-}
-
-#modal-remove-btn:hover {
-    background: #cc9999;
-    color: white;
 }
 
 #congrats-modal .easter-decoration {
@@ -794,146 +739,6 @@ body, html {
     display: block; /* Make button a block element for proper centering */
 }
 
-/* Responsive design improvements */
-@media (max-width: 768px) {
-    #setup-container {
-        flex-direction: column;
-    }
-    
-    #setup-controls {
-        width: 100%;
-        height: auto;
-        max-height: 50vh;
-    }
-    
-    #egg-placement-area {
-        height: 50vh;
-    }
-    
-    .icon-button {
-        bottom: 70px;
-    }
-    
-    /* Mobile-specific improvements */
-    #clue-display {
-        top: 10px;
-        left: 10px;
-        right: 10px;
-        max-width: none;
-        width: calc(100% - 20px);
-        font-size: 0.9em;
-        padding: 10px;
-    }
-    
-    #floating-ui {
-        top: auto;
-        bottom: 10px;
-        right: 10px;
-        left: 10px;
-        width: calc(100% - 20px);
-        padding: 10px;
-        font-size: 0.9em;
-        animation: none; /* Remove floating animation on mobile */
-    }
-    
-    .modal-content {
-        width: 95%;
-        padding: 15px;
-    }
-    
-    /* Make buttons larger on touch screens */
-    .control-btn, .main-btn, #modal-save-btn, #modal-remove-btn, #modal-cancel-btn {
-        padding: 12px 20px;
-        min-height: 44px; /* Minimum touch target size */
-    }
-    
-    /* Increase egg size for easier tapping */
-    .egg, .setup-egg {
-        width: 56px;
-        height: 56px;
-        font-size: 36px;
-    }
-    
-    .egg::before, .setup-egg::before {
-        width: 56px;
-        height: 56px;
-    }
-    
-    /* Ensure forms are usable on mobile */
-    input, textarea, button {
-        font-size: 16px; /* Prevents iOS zoom on focus */
-    }
-    
-    /* Fix UI cropping on iPhones with vertical aspect ratio */
-    #setup-container {
-        max-width: 100%;
-        overflow-x: hidden;
-    }
-    
-    /* Ensure clue display and floating UI don't overlap on narrow screens */
-    #clue-display {
-        position: fixed;
-        width: calc(100% - 40px);
-        max-width: 100%;
-        margin: 0 auto;
-        left: 50%;
-        transform: translateX(-50%);
-        box-sizing: border-box;
-    }
-    
-    #floating-ui {
-        width: calc(100% - 40px);
-        box-sizing: border-box;
-        left: 50%;
-        transform: translateX(-50%);
-        bottom: 20px;
-    }
-    
-    /* Improve modal positioning on mobile */
-    .modal-content {
-        max-width: 90%;
-        box-sizing: border-box;
-    }
-    
-    /* Adjust setup controls for better mobile experience */
-    #setup-controls {
-        box-sizing: border-box;
-        padding: 15px;
-        overflow-y: auto;
-    }
-    
-    /* Ensure camera modal interface is properly sized */
-    .camera-container {
-        width: 90%;
-    }
-}
-
-/* For even smaller screens (phones) */
-@media (max-width: 480px) {
-    #start-screen h1 {
-        font-size: 2em;
-    }
-    
-    #start-screen p {
-        font-size: 1.2em;
-    }
-    
-    .main-btn {
-        padding: 12px 18px;
-        font-size: 1em;
-    }
-    
-    /* Stack buttons on very small screens */
-    .button-group {
-        flex-direction: column;
-    }
-}
-
-/* Enhance active states for touch interactions */
-.egg:active, .setup-egg:active, .main-btn:active, .control-btn:active {
-    transform: scale(0.95);
-}
-
 /* Custom file input styling */
 .custom-file-input {
     font-family: 'Comic Sans MS', cursive, sans-serif;
@@ -946,78 +751,67 @@ body, html {
     transition: all 0.3s;
 }
 
-/* Adding styles for the camera functionality */
-.background-controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* Matching styles for file upload and camera buttons */
+/* Camera button styles */
 #camera-capture, #file-upload-btn {
-  padding: 5px 10px;
-  font-size: 1.2rem;
-  cursor: pointer;
-  background-color: #f9f3f3;
-  border: 1px solid #e6c0c0;
-  border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    background-color: #f9f3f3;
+    border: 1px solid #e6c0c0;
+    border-radius: 4px;
 }
 
 #camera-capture:hover, #file-upload-btn:hover {
-  background-color: #ffcccc;
+    background-color: #ffcccc;
 }
 
 /* Camera modal styles */
 #camera-modal {
-  display: flex;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.8);
-  z-index: 1000;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }
 
 .camera-container {
-  position: relative;
-  max-width: 90%;
-  max-height: 70vh;
-  margin-bottom: 20px;
+    position: relative;
+    max-width: 90%;
+    max-height: 70vh;
+    margin-bottom: 20px;
 }
 
 #camera-preview {
-  max-width: 100%;
-  max-height: 70vh;
-  border: 3px solid white;
-  border-radius: 8px;
+    max-width: 100%;
+    max-height: 70vh;
+    border: 3px solid white;
+    border-radius: 8px;
 }
 
 .camera-controls {
-  display: flex;
-  gap: 15px;
-  margin-top: 15px;
+    display: flex;
+    gap: 15px;
+    margin-top: 15px;
 }
 
 .camera-controls button {
-  padding: 10px 20px;
-  background: #fff;
-  border: 2px solid #ffcccc;
-  border-radius: 30px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s;
+    padding: 10px 20px;
+    background: #fff;
+    border: 2px solid #ffcccc;
+    border-radius: 30px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
 }
 
 .camera-controls button:hover {
-  background: #ffcccc;
-}
-
-.hidden {
-  display: none !important;
+    background: #ffcccc;
 }
 
 /* Styling for the background image */
@@ -1042,36 +836,6 @@ body, html {
     filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.7));
     z-index: 500;
     pointer-events: none;
-}
-
-/* Animation for pawprint fade-in */
-@keyframes fadeInPawprint {
-    from { opacity: 0; transform: translate(-50%, -50%) scale(0.5) rotate(var(--rotation)); }
-    to { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(var(--rotation)); }
-}
-
-/* Hint button styling */
-#hint-button {
-  margin-top: 10px;
-  background: #ffeecc;
-  border: 2px solid #ffcc99;
-  color: #cc6633;
-  padding: 8px 15px;
-  font-size: 1em;
-  transition: all 0.3s;
-  width: 100%;
-}
-
-#hint-button:hover {
-  background: #ffcc99;
-  color: #994400;
-  transform: scale(1.05);
-}
-
-#hint-button.used {
-  background: #f9e9f9;
-  border-color: #dd99dd;
-  color: #8855dd;
 }
 
 /* Loading spinner and progress bar */
@@ -1132,23 +896,12 @@ body, html {
     user-select: none; /* Prevents text selection when tapping */
 }
 
-/* Make touch targets larger on mobile - ensures minimum 44x44px tap area per iOS guidelines */
-@media (max-width: 768px) {
-    .main-btn, .control-btn, #modal-save-btn, #modal-remove-btn, #modal-cancel-btn, #hint-button, 
-    #restart-btn, #reset-btn, #file-upload-btn, #camera-capture {
-        min-height: 44px;
-        min-width: 44px;
-        padding: 12px 20px;
-        margin: 8px 4px;
-    }
-    
-    /* Add visible feedback for touch interactions */
-    .main-btn:active, .control-btn:active, #modal-save-btn:active, #modal-remove-btn:active, 
-    #modal-cancel-btn:active, #hint-button:active, #restart-btn:active, #reset-btn:active {
-        transform: scale(0.96);
-        opacity: 0.9;
-        transition: transform 0.1s, opacity 0.1s;
-    }
+/* Touch active state for better mobile feedback */
+.touch-active {
+    transform: scale(0.95) !important;
+    opacity: 0.9 !important;
+    transition: transform 0.1s, opacity 0.1s !important;
+    background-color: rgba(255, 153, 204, 0.8) !important;
 }
 
 /* More Settings section styles */
@@ -1245,49 +998,6 @@ body, html {
     font-family: 'Comic Neue Local', 'Comic Neue', monospace;
 }
 
-@media (max-width: 480px) {
-    .version-info {
-        bottom: 5px;
-        right: 5px;
-        font-size: 0.7em;
-    }
-}
-
-/* Touch active state for better mobile feedback */
-.touch-active {
-    transform: scale(0.95) !important;
-    opacity: 0.9 !important;
-    transition: transform 0.1s, opacity 0.1s !important;
-    background-color: rgba(255, 153, 204, 0.8) !important;
-}
-
-/* Settings button in top right corner */
-.settings-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.8);
-    border: 2px solid #ffcccc;
-    font-size: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 120;
-    transition: all 0.3s;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    padding: 0; /* Remove padding to ensure centering works properly */
-    line-height: 1; /* Ensure line height doesn't affect vertical alignment */
-}
-
-.settings-btn:hover {
-    transform: scale(1.1) rotate(15deg);
-    background: #ffcccc;
-}
-
 /* Settings Modal Styling */
 #settings-modal .modal-content {
     max-width: 450px;
@@ -1295,7 +1005,7 @@ body, html {
     border-radius: 20px;
     border: 2px solid #ff99cc;
     background-color: #fff;
-    position: relative; /* Add this to make absolute positioning work correctly */
+    position: relative;
 }
 
 /* Close button for settings modal - fixed positioning */
@@ -1316,8 +1026,14 @@ body, html {
     cursor: pointer;
     transition: all 0.2s;
     z-index: 10;
-    padding: 0; /* Remove any padding that might affect positioning */
-    line-height: 1; /* Fix line height to center the X character */
+    padding: 0;
+    line-height: 1;
+}
+
+#settings-modal .close-btn:hover {
+    background-color: #ff99cc;
+    color: white;
+    transform: scale(1.1);
 }
 
 #settings-modal h2 {
@@ -1400,43 +1116,9 @@ body, html {
     background-color: #ffe6f2;
     border: 2px solid #ff99cc;
     color: #ff66b3;
-    cursor: pointer;
-    transition: all 0.2s;
 }
 
-#settings-modal .control-btn:hover {
-    background-color: #ff99cc;
-    color: white;
-    transform: scale(1.05);
-}
-
-/* Close button for settings modal */
-#settings-modal .close-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background-color: #ffcccc;
-    border: none;
-    color: #ff66b3;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    z-index: 10;
-}
-
-#settings-modal .close-btn:hover {
-    background-color: #ff99cc;
-    color: white;
-    transform: scale(1.1);
-}
-
-/* Reorganized custom background section */
+/* Background section */
 .background-section {
     margin-bottom: 20px;
     background-color: #f9f9f9;
@@ -1461,7 +1143,7 @@ body, html {
 
 .background-controls {
     display: flex;
-    justify-content: flex-end; /* Align buttons to the right */
+    justify-content: flex-end;
     gap: 10px;
     margin: 10px 0;
 }
@@ -1479,11 +1161,127 @@ body, html {
     border-radius: 8px;
 }
 
-.helper-text {
-    font-size: 0.75em;
-    color: #888;
-    margin-top: 8px;
-    margin-bottom: 0;
-    font-style: italic;
-    text-align: center;
+/* Responsive design improvements */
+@media (max-width: 768px) {
+    #setup-container {
+        flex-direction: column;
+    }
+    
+    #setup-controls {
+        width: 100%;
+        height: auto;
+        max-height: 50vh;
+    }
+    
+    #egg-placement-area {
+        height: 50vh;
+    }
+    
+    .icon-button {
+        bottom: 70px;
+    }
+    
+    /* Mobile-specific improvements */
+    #clue-display, #floating-ui {
+        width: calc(100% - 40px);
+        max-width: 100%;
+        box-sizing: border-box;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    #clue-display {
+        top: 10px;
+        font-size: 0.9em;
+        padding: 10px;
+    }
+    
+    #floating-ui {
+        top: auto;
+        bottom: 20px;
+        padding: 10px;
+        font-size: 0.9em;
+        animation: none; /* Remove floating animation on mobile */
+    }
+    
+    .modal-content {
+        width: 95%;
+        max-width: 90%;
+        padding: 15px;
+        box-sizing: border-box;
+    }
+    
+    /* Make buttons larger on touch screens */
+    .control-btn, .main-btn, #modal-save-btn, #modal-remove-btn, #modal-cancel-btn {
+        padding: 12px 20px;
+        min-height: 44px; /* Minimum touch target size */
+        margin: 8px 4px;
+    }
+    
+    /* Increase egg size for easier tapping */
+    .egg, .setup-egg {
+        width: 56px;
+        height: 56px;
+        font-size: 36px;
+    }
+    
+    .egg::before, .setup-egg::before {
+        width: 56px;
+        height: 56px;
+    }
+    
+    /* Ensure forms are usable on mobile */
+    input, textarea, button {
+        font-size: 16px; /* Prevents iOS zoom on focus */
+    }
+    
+    /* Fix UI cropping on iPhones with vertical aspect ratio */
+    #setup-container {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    
+    /* Adjust setup controls for better mobile experience */
+    #setup-controls {
+        box-sizing: border-box;
+        padding: 15px;
+        overflow-y: auto;
+    }
+    
+    /* Ensure camera modal interface is properly sized */
+    .camera-container {
+        width: 90%;
+    }
+    
+    /* Stack buttons on very small screens */
+    .button-group {
+        flex-direction: column;
+    }
+}
+
+/* For even smaller screens (phones) */
+@media (max-width: 480px) {
+    #start-screen h1 {
+        font-size: 2em;
+    }
+    
+    #start-screen p {
+        font-size: 1.2em;
+    }
+    
+    .main-btn {
+        padding: 12px 18px;
+        font-size: 1em;
+    }
+    
+    .version-info {
+        bottom: 5px;
+        right: 5px;
+        font-size: 0.7em;
+    }
+}
+
+/* Enhance active states for touch interactions */
+.egg:active, .setup-egg:active, .main-btn:active, .control-btn:active {
+    transform: scale(0.95);
 }
