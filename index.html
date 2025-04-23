@@ -124,18 +124,25 @@
     
     <!-- New Unified Hunt UI Panel - Now outside game-container for better z-index handling -->
     <div id="hunt-ui-panel" class="hidden">
-        <h2>Easter Egg Hunt!</h2>
-        <div class="hunt-ui-counters">
-            <div class="clue-counter-display">Clue <span id="clue-number">1</span> of <span id="total-clues">0</span></div>
-            <div class="hunt-score">Eggs found: <span id="found-count">0</span>/<span id="total-count">0</span></div>
+        <div class="hunt-ui-content">
+            <h2>Easter Egg Hunt!</h2>
+            <div class="hunt-ui-counters">
+                <div class="clue-counter-display">Clue <span id="clue-number">1</span> of <span id="total-clues">0</span></div>
+                <div class="hunt-score">Eggs found: <span id="found-count">0</span>/<span id="total-count">0</span></div>
+            </div>
+            <div class="hunt-clue-container">
+                <button id="hint-button" class="hint-btn" title="Get a hint">💡</button>
+                <p>Here is your clue:</p>
+                <div class="hunt-clue-text" id="current-clue"></div>
+            </div>
+            <button id="reset-btn" class="control-btn">Reset Hunt</button>
+            <div class="easter-decoration">🐰 🥚 🐣</div>
         </div>
-        <div class="hunt-clue-container">
-            <button id="hint-button" class="hint-btn" title="Get a hint">💡</button>
-            <p>Here is your clue:</p>
-            <div class="hunt-clue-text" id="current-clue"></div>
+        <div class="hunt-ui-toggle">
+            <button id="hunt-ui-toggle-btn" class="icon-button toggle-btn" title="Expand/Collapse Panel">
+                <span class="toggle-arrow">↑</span>
+            </button>
         </div>
-        <button id="reset-btn" class="control-btn">Reset Hunt</button>
-        <div class="easter-decoration">🐰 🥚 🐣</div>
     </div>
     
     <!-- OLD Clue display - Will be removed once new UI is working -->

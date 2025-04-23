@@ -261,11 +261,12 @@ body, html {
     filter: drop-shadow(0px 0px 3px white) drop-shadow(0px 0px 5px rgba(0,0,0,0.5));
     margin: 0;
     padding: 0;
+    transition: opacity 0.3s ease, transform 0.2s ease;
 }
 
 /* Common styles for egg background */
 .egg::before, .setup-egg::before {
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: rgba(255, 255, 255);
     border-radius: 50%;
     width: 48px;
     height: 48px;
@@ -286,13 +287,13 @@ body, html {
 .setup-egg::before {
     content: '🐰'; /* Use bunny emoji instead of egg */
     position: relative;
-    z-index: 2;
+    z-index: 6;
 }
 
 /* Add egg number */
 .setup-egg::after {
     content: attr(data-number);
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.95);
     border-radius: 50%;
     width: 20px;
     height: 20px;
@@ -302,17 +303,16 @@ body, html {
     font-size: 12px;
     font-weight: bold;
     color: #ff66b3;
-    box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
     position: absolute;
-    bottom: 0;
-    right: 0;
-    z-index: 3;
+    bottom: -2px;
+    right: -2px;
+    z-index: 7; /* Increased z-index to be above the egg content */
 }
 
 /* Game egg specific styles */
 .egg {
     cursor: pointer !important;
-    opacity: 0.85;
     border: none;
     background-color: transparent;
     transition: transform 0.3s ease, opacity 0.5s ease;
@@ -327,6 +327,28 @@ body, html {
     right: -5px;
     font-size: 16px;
     filter: drop-shadow(0px 0px 2px white);
+    opacity: 1 !important;
+}
+
+/* Ensure found eggs are always visible */
+.egg.found {
+    opacity: 1 !important;
+    pointer-events: none;
+    color: rgba(0, 0, 0, 1) !important; /* Ensures text content (emoji) is fully opaque */
+}
+
+/* Specific rule to ensure emoji content inside found eggs is fully visible */
+.egg.found::before,
+.egg.found::after,
+.egg.found > * {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Ensure found eggs are always visible */
+.egg.found {
+    opacity: 1 !important;
+    pointer-events: none;
 }
 
 /* Different bob animations for each egg to make them feel more lively */
@@ -343,7 +365,7 @@ body, html {
 }
 
 .egg:hover {
-    transform: scale(1.2);
+    transform: scale(1.1);
     cursor: pointer !important;
     animation: none;
 }
@@ -351,12 +373,12 @@ body, html {
 /* New egg highlight */
 .new-egg {
     animation: newEggPulse 1.5s ease-in-out 2;
-    filter: drop-shadow(0px 0px 5px #ff66b3) drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.8));
+    filter: drop-shadow(0px 0px 5px #ff66b3) drop-shadow(0px 0px 10px rgba(255, 255, 255));
 }
 
 /* New egg highlight - pink gradient background instead of just white */
 .new-egg::before {
-    background: radial-gradient(circle, rgba(255,204,230,0.9) 0%, rgba(255,255,255,0.7) 100%);
+    background: radial-gradient(circle, rgba(255,204,230,0.9) 0%, rgba(255,255,255) 100%);
     box-shadow: 0 0 8px rgba(255, 102, 179, 0.6);
 }
 
@@ -453,8 +475,8 @@ body, html {
 /* Hint button positioning - specific to hint button */
 .hint-btn {
     position: absolute; /* Changed from fixed to absolute for proper positioning */
-    top: 10px;
-    right: 10px;
+    top: 2px;
+    right: 2px;
     width: 36px;
     height: 36px;
     font-size: 18px;
@@ -1160,22 +1182,95 @@ body, html {
 /* New Unified Hunt UI Panel styles */
 #hunt-ui-panel {
     position: fixed;
-    top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
     width: 90%;
     max-width: 500px;
-    padding: 20px 25px;
     background: rgba(255, 255, 255, 0.95);
     border-radius: 20px;
     border: 3px solid #ffcccc;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
     text-align: center;
     z-index: 1500; /* Increased z-index to ensure visibility */
-    transition: all 0.3s ease;
+    transition: all 0.5s ease;
+    top: 50%; /* Default center position when expanded */
+    transform: translate(-50%, -50%);
+}
+
+/* Collapsed state positioning */
+#hunt-ui-panel.collapsed {
+    top: 20px;
+    transform: translateX(-50%) translateY(0);
+    max-width: 90%;
+    border-radius: 15px;
+}
+
+/* Content container for animations */
+.hunt-ui-content {
+    padding: 20px 25px;
     display: flex;
     flex-direction: column;
     gap: 15px;
+    transition: max-height 0.5s ease, opacity 0.3s ease;
+}
+
+/* Styles for collapsed panel */
+#hunt-ui-panel.collapsed .hunt-ui-content {
+    padding: 15px 20px 10px;
+}
+
+/* Hide everything except clue container when collapsed */
+#hunt-ui-panel.collapsed h2,
+#hunt-ui-panel.collapsed .hunt-ui-counters,
+#hunt-ui-panel.collapsed #reset-btn,
+#hunt-ui-panel.collapsed .easter-decoration {
+    display: none;
+}
+
+/* Toggle button container */
+.hunt-ui-toggle {
+    position: relative; 
+    height: 0;
+    width: 100%;
+}
+
+/* Toggle button styling */
+.toggle-btn {
+    position: absolute;
+    bottom: -18px; /* Position at bottom edge */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #ffcccc;
+    border: 2px solid #ff99cc;
+    color: #ff66b3;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1600; /* Above panel */
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    padding: 0;
+    line-height: 1;
+}
+
+.toggle-btn:hover {
+    background: #ff99cc;
+    color: white;
+    transform: translateX(-50%) scale(1.1);
+}
+
+/* Rotate arrow when collapsed */
+#hunt-ui-panel.collapsed .toggle-arrow {
+    transform: rotate(180deg);
+    display: inline-block;
+}
+
+/* Adjust hunt clue container in collapsed mode */
+#hunt-ui-panel.collapsed .hunt-clue-container {
+    margin: 0;
 }
 
 #hunt-ui-panel h2 {
@@ -1232,6 +1327,9 @@ body, html {
 @media (max-width: 768px) {
     #hunt-ui-panel {
         width: 90%;
+    }
+    
+    #hunt-ui-panel .hunt-ui-content {
         padding: 15px;
     }
     
@@ -1241,24 +1339,6 @@ body, html {
     
     .hunt-ui-counters {
         font-size: 0.9em;
-    }
-}
-
-/* For even smaller screens (phones) */
-@media (max-width: 480px) {
-    #hunt-ui-panel {
-        width: 95%;
-        padding: 12px;
-    }
-    
-    #hunt-ui-panel h2 {
-        font-size: 1.3em;
-        margin-bottom: 8px;
-    }
-    
-    .hunt-ui-counters {
-        flex-direction: column;
-        gap: 5px;
     }
 }
 
@@ -1385,4 +1465,79 @@ body, html {
 /* Enhance active states for touch interactions */
 .egg:active, .setup-egg:active, .main-btn:active, .control-btn:active, .hint-btn:active {
     transform: scale(0.95);
+}
+
+/* Egg styles */
+.egg {
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255);
+    border: 2px solid #ff99cc;
+    font-size: 22px;
+    line-height: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    transition: transform 0.3s, background-color 0.3s, opacity 0.3s ease;
+    z-index: 1000;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+    box-sizing: content-box;
+    -webkit-tap-highlight-color: transparent; /* Prevents tap highlight on mobile */
+    user-select: none;
+}
+
+.egg:hover, .egg:focus {
+    transform: translate(-50%, -50%) scale(1.1);
+    background-color: rgba(255, 255, 255, 0.7);
+}
+
+/* Special hover reveal effect */
+.egg-hover-reveal {
+    box-shadow: 0 0 15px 8px rgba(255, 204, 102, 0.8);
+    filter: drop-shadow(0 0 10px #ffcc66) brightness(1.2);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.15); }
+}
+
+/* Celebration animation when egg is found */
+@keyframes celebrate {
+    0% { opacity: 0; transform: scale(0) rotate(0deg); }
+    25% { opacity: 1; transform: scale(1.2) rotate(20deg); }
+    50% { opacity: 1; transform: scale(0.9) rotate(-15deg); }
+    75% { opacity: 1; transform: scale(1.1) rotate(5deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+/* Egg hover reveal effect */
+.egg-hover-reveal {
+    animation: egg-glow 1.5s infinite alternate;
+    cursor: pointer;
+    filter: drop-shadow(0 0 8px rgba(255, 102, 179, 0.8));
+}
+
+@keyframes egg-glow {
+    from {
+        filter: drop-shadow(0 0 8px rgba(255, 102, 179, 0.8));
+    }
+    to {
+        filter: drop-shadow(0 0 15px rgba(255, 102, 179, 0.9));
+    }
+}
+
+/* Smooth opacity transition for eggs */
+.egg {
+    transition: opacity 0.3s ease, transform 0.2s ease;
+}
+
+.egg:hover {
+    transform: scale(1.1);
 }

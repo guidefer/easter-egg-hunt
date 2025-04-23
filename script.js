@@ -12,6 +12,8 @@ let soundEnabled = true; // Allow users to toggle sounds
 let isNewEgg = false; // Flag to track if we're creating a new egg or editing existing
 let currentBackground = 'Living-room.png'; // Track the current background image
 let touchEnabled = 'ontouchstart' in window; // Detect if device supports touch
+let huntUIPanelCollapsed = false; // Track if the hunt UI panel is collapsed
+let autoCollapseTimerId = null; // Timer for auto-collapsing the hunt UI panel
 
 // Game version - update this when making significant changes
 const GAME_VERSION = '1.3.1'; // Updated version number for UI changes
@@ -972,6 +974,12 @@ function startGame() {
                 // Show first clue
                 showCurrentClue();
                 
+                // Initialize huntUI collapse/expand functionality
+                initHuntUIPanelToggle();
+                
+                // Start auto-collapse timer (collapse after 5 seconds)
+                startAutoCollapseTimer();
+                
                 // Ensure the huntUIPanel is visible by setting a slight delay
                 setTimeout(() => {
                     if (huntUIPanel.classList.contains('hidden')) {
@@ -1055,6 +1063,66 @@ function createGameEggs() {
     updateClickableEggs();
 }
 
+/**
+ * Creates egg elements in the game
+ */
+function createEggElements() {
+    // Clear existing eggs
+    const gameContainer = document.getElementById('game-container');
+    const existingEggs = gameContainer.querySelectorAll('.egg');
+    existingEggs.forEach(egg => egg.remove());
+
+    // Create new eggs
+    eggData.forEach((egg, index) => {
+        const eggElement = document.createElement('div');
+        eggElement.className = 'egg';
+        eggElement.dataset.eggIndex = index;
+        
+        // Position the egg
+        eggElement.style.left = egg.left;
+        eggElement.style.top = egg.top;
+        
+        // If not the current egg to find, make invisible
+        if (index !== currentEggIndex) {
+            eggElement.style.opacity = '0';
+        } else {
+            // This is the egg we're looking for
+            eggElement.style.opacity = '0'; // Initially hidden until found
+        }
+        
+        // Add event listeners for egg clicking
+        eggElement.addEventListener('click', handleEggClick);
+        
+        // Add hover events for revealing the egg
+        eggElement.addEventListener('mouseover', handleEggHover);
+        eggElement.addEventListener('mouseleave', handleEggMouseLeave);
+        
+        // Add touch events for mobile
+        eggElement.addEventListener('touchstart', handleEggClick);
+        
+        // Apply animations and styles
+        if (egg.isNew) {
+            eggElement.classList.add('new-egg');
+            // Remove new egg flag after displaying
+            setTimeout(() => {
+                eggElement.classList.remove('new-egg');
+                egg.isNew = false;
+            }, 3000);
+        }
+        
+        // Apply different animations to different eggs
+        const animations = ['animation-bobble', 'animation-pulse', 'animation-bounce'];
+        const randomAnimation = animations[Math.floor(Math.random() * animations.length)];
+        eggElement.classList.add(randomAnimation);
+        
+        gameContainer.appendChild(eggElement);
+    });
+    
+    // Update the score and clue text
+    updateScoreDisplay();
+    updateClueText();
+}
+
 function updateClickableEggs() {
     // Get all eggs in the game container
     const eggs = document.querySelectorAll('.egg');
@@ -1070,12 +1138,15 @@ function updateClickableEggs() {
     eggs.forEach((egg, index) => {
         if (index === currentEggIndex) {
             // Current egg - make it invisible initially, but still clickable
-            // It will become visible only when the hint button is clicked
             egg.style.cursor = 'pointer';
             egg.style.opacity = '0'; // Start invisible
             egg.style.pointerEvents = 'auto'; // Keep clickable even if invisible
             egg.disabled = false;
             egg.setAttribute('aria-hidden', 'false');
+            
+            // Add hover effect for desktop users
+            egg.addEventListener('mouseenter', handleEggHover);
+            egg.addEventListener('mouseleave', handleEggMouseLeave);
             
             // Extra verification to ensure this egg is properly positioned
             const eggInfo = eggData[index];
@@ -1088,6 +1159,10 @@ function updateClickableEggs() {
             egg.disabled = true;
             egg.setAttribute('aria-hidden', 'true');
             egg.style.animation = '';
+            
+            // Remove hover listeners from previously found eggs
+            egg.removeEventListener('mouseenter', handleEggHover);
+            egg.removeEventListener('mouseleave', handleEggMouseLeave);
         } else {
             // Future eggs - invisible and not clickable
             egg.style.opacity = '0';
@@ -1095,11 +1170,55 @@ function updateClickableEggs() {
             egg.disabled = true;
             egg.setAttribute('aria-hidden', 'true');
             egg.style.animation = '';
+            
+            // Remove hover listeners from future eggs
+            egg.removeEventListener('mouseenter', handleEggHover);
+            egg.removeEventListener('mouseleave', handleEggMouseLeave);
         }
     });
     
     // Reset the hint button state for the new egg
     resetHintButton();
+}
+
+/**
+ * Handle egg hover event - reveals the egg temporarily
+ * This provides desktop users with a way to discover eggs by hovering
+ */
+function handleEggHover(e) {
+    // Only reveal the egg if it's the current one being searched for
+    if (parseInt(this.dataset.eggIndex) === currentEggIndex) {
+        // Fade in the egg
+        this.style.transition = 'opacity 0.3s ease';
+        this.style.opacity = '0.8';
+        
+        // Add glow effect to highlight that this is the egg
+        this.classList.add('egg-hover-reveal');
+    }
+}
+
+/**
+ * Handle mouse leaving egg - hides the egg again
+ */
+function handleEggMouseLeave(e) {
+    // Only handle if it's the current egg
+    if (parseInt(this.dataset.eggIndex) === currentEggIndex) {
+        // Don't hide if hint was used
+        if (!hintUsed) {
+            this.style.opacity = '0';
+        }
+        
+        // Remove the hover effect
+        this.classList.remove('egg-hover-reveal');
+    }
+}
+
+// Handle egg click event
+function handleEggClick(e) {
+    const eggIndex = parseInt(this.dataset.eggIndex);
+    if (eggIndex === currentEggIndex) {
+        eggFound(this);
+    }
 }
 
 function showCurrentClue() {
@@ -1151,8 +1270,8 @@ function eggFound(eggElement) {
   // Add celebration effect
   createCelebration(eggElement.style.left, eggElement.style.top);
   
-  // Make the egg fully visible to reveal it
-  eggElement.style.opacity = '1';
+  // Make the egg fully visible to reveal it - using !important inline style
+  eggElement.style.cssText += " opacity: 1 !important;";
   eggElement.style.cursor = 'default';
   eggElement.style.pointerEvents = 'none';
   eggElement.disabled = true;
@@ -1195,6 +1314,9 @@ function eggFound(eggElement) {
   // Show next clue or end game
   if (currentEggIndex < eggData.length) {
     showCurrentClue();
+    
+    // Expand the UI panel when showing a new clue and restart auto-collapse timer
+    expandHuntUIPanel();
   } else {
     // All eggs found!
     setTimeout(() => {
@@ -1228,6 +1350,9 @@ function eggFound(eggElement) {
       currentClueText.textContent = 'All eggs found! Great job!';
       huntUIPanel.style.backgroundColor = 'rgba(255, 215, 0, 0.8)';
       huntUIPanel.style.border = '3px solid gold';
+      
+      // For the final clue, keep panel expanded rather than auto-collapsing
+      expandHuntUIPanel(false); // Pass false to prevent auto-collapse
     }, 500);
   }
 }
@@ -2287,4 +2412,113 @@ function updateVolume(volume) {
     volumeSliders.forEach(slider => {
         slider.value = volume * 100;
     });
+}
+
+/**
+ * Initialize the hunt UI panel toggle functionality
+ * This sets up the toggle button to collapse/expand the panel
+ */
+function initHuntUIPanelToggle() {
+    const toggleBtn = document.getElementById('hunt-ui-toggle-btn');
+    
+    if (toggleBtn) {
+        // Set initial state (expanded)
+        huntUIPanelCollapsed = false;
+        toggleBtn.setAttribute('aria-expanded', 'true');
+        
+        // Add click event for toggling
+        toggleBtn.addEventListener('click', toggleHuntUIPanel);
+        
+        // Add touch event for better mobile experience
+        toggleBtn.addEventListener('touchend', function(e) {
+            e.preventDefault(); // Prevent default touch behavior
+            toggleHuntUIPanel();
+        }, { passive: false });
+        
+        // Start auto-collapse timer (collapse after 5 seconds)
+        startAutoCollapseTimer();
+    }
+}
+
+/**
+ * Toggle the hunt UI panel between collapsed and expanded states
+ * This function handles the visual transition and state tracking
+ */
+function toggleHuntUIPanel() {
+    const panel = document.getElementById('hunt-ui-panel');
+    const toggleBtn = document.getElementById('hunt-ui-toggle-btn');
+    
+    if (!panel || !toggleBtn) return;
+    
+    // Toggle collapsed state
+    huntUIPanelCollapsed = !huntUIPanelCollapsed;
+    
+    // Update panel class and ARIA attributes
+    if (huntUIPanelCollapsed) {
+        panel.classList.add('collapsed');
+        toggleBtn.setAttribute('aria-expanded', 'false');
+    } else {
+        panel.classList.remove('collapsed');
+        toggleBtn.setAttribute('aria-expanded', 'true');
+    }
+    
+    // Log state change for debugging
+    console.log(`Hunt UI Panel ${huntUIPanelCollapsed ? 'collapsed' : 'expanded'}`);
+}
+
+/**
+ * Start or restart the auto-collapse timer for the hunt UI panel
+ * Panel will auto-collapse after 5 seconds of inactivity
+ */
+function startAutoCollapseTimer() {
+    // Clear any existing timers
+    if (autoCollapseTimerId) {
+        clearTimeout(autoCollapseTimerId);
+    }
+    
+    // Set new timer to collapse after 5 seconds
+    autoCollapseTimerId = setTimeout(() => {
+        if (!huntUIPanelCollapsed) {
+            // Only collapse if currently expanded
+            toggleHuntUIPanel();
+        }
+    }, 5000); // 5 seconds
+}
+
+/**
+ * Expand the hunt UI panel and optionally start the auto-collapse timer
+ * @param {boolean} startTimer - Whether to start the auto-collapse timer (default: true)
+ */
+function expandHuntUIPanel(startTimer = true) {
+    const panel = document.getElementById('hunt-ui-panel');
+    const toggleBtn = document.getElementById('hunt-ui-toggle-btn');
+    
+    if (!panel || !toggleBtn) return;
+    
+    // Only do something if the panel is currently collapsed
+    if (huntUIPanelCollapsed) {
+        // Update collapsed state
+        huntUIPanelCollapsed = false;
+        
+        // Update panel class and ARIA attributes
+        panel.classList.remove('collapsed');
+        toggleBtn.setAttribute('aria-expanded', 'true');
+        
+        console.log('Hunt UI Panel auto-expanded');
+    }
+    
+    // Clear any existing auto-collapse timer
+    if (autoCollapseTimerId) {
+        clearTimeout(autoCollapseTimerId);
+    }
+    
+    // Start a new auto-collapse timer if requested
+    if (startTimer) {
+        autoCollapseTimerId = setTimeout(() => {
+            if (!huntUIPanelCollapsed) {
+                // Only collapse if currently expanded
+                toggleHuntUIPanel();
+            }
+        }, 5000); // 5 seconds
+    }
 }
