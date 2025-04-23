@@ -14,7 +14,7 @@ let currentBackground = 'Living-room.png'; // Track the current background image
 let touchEnabled = 'ontouchstart' in window; // Detect if device supports touch
 
 // Game version - update this when making significant changes
-const GAME_VERSION = '1.3.0'; // Major.Minor.Patch format
+const GAME_VERSION = '1.3.1'; // Updated version number for UI changes
 
 // Sound effects using the Web Audio API
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -297,8 +297,7 @@ const AnimationManager = {
 const startScreen = document.getElementById('start-screen');
 const setupScreen = document.getElementById('setup-screen');
 const gameContainer = document.getElementById('game-container');
-const clueDisplay = document.getElementById('clue-display');
-const floatingUI = document.getElementById('floating-ui');
+const huntUIPanel = document.getElementById('hunt-ui-panel');
 const currentClueText = document.getElementById('current-clue');
 const foundCountElement = document.getElementById('found-count');
 const totalCountElement = document.getElementById('total-count');
@@ -306,11 +305,29 @@ const eggModal = document.getElementById('egg-modal');
 const modalEggNumber = document.getElementById('modal-egg-number');
 const modalEggClue = document.getElementById('modal-egg-clue');
 
+// Legacy DOM elements (will be deprecated)
+const clueDisplayLegacy = document.getElementById('clue-display');
+const floatingUILegacy = document.getElementById('floating-ui');
+const currentClueTextLegacy = document.getElementById('current-clue-old');
+const foundCountElementLegacy = document.getElementById('found-count-old');
+const totalCountElementLegacy = document.getElementById('total-count-old');
+
 // Setup buttons
 document.getElementById('setup-btn').addEventListener('click', startSetupWithLoading);
 document.getElementById('add-egg-btn').addEventListener('click', showAddEggModal);
 document.getElementById('start-game-btn').addEventListener('click', startGame);
 document.getElementById('reset-btn').addEventListener('click', resetGame);
+
+// Legacy reset button (will be deprecated)
+if (document.getElementById('reset-btn-old')) {
+    document.getElementById('reset-btn-old').addEventListener('click', resetGame);
+}
+
+// Settings buttons - Updated for unique IDs
+const settingsBtnSetup = document.getElementById('settings-btn-setup');
+const settingsBtnGame = document.getElementById('settings-btn-game');
+if (settingsBtnSetup) settingsBtnSetup.addEventListener('click', openSettingsModal);
+if (settingsBtnGame) settingsBtnGame.addEventListener('click', openSettingsModal);
 
 // Modal buttons
 document.getElementById('modal-save-btn').addEventListener('click', saveEggFromModal);
@@ -931,8 +948,13 @@ function startGame() {
                 // Hide setup screen and show game screen
                 setupScreen.classList.add('hidden');
                 gameContainer.classList.remove('hidden');
-                clueDisplay.classList.remove('hidden');
-                floatingUI.classList.remove('hidden');
+                
+                // Show the new unified UI panel
+                huntUIPanel.classList.remove('hidden');
+                
+                // Hide legacy UI elements (will be removed in future version)
+                clueDisplayLegacy.classList.add('hidden');
+                floatingUILegacy.classList.add('hidden');
                 
                 // Reset game state
                 foundCount = 0;
@@ -940,11 +962,23 @@ function startGame() {
                 foundCountElement.textContent = foundCount;
                 totalCountElement.textContent = eggData.length;
                 
+                // Support legacy elements too (will be removed in future version)
+                if (foundCountElementLegacy) foundCountElementLegacy.textContent = foundCount;
+                if (totalCountElementLegacy) totalCountElementLegacy.textContent = eggData.length;
+                
                 // Create eggs in the game container
                 createGameEggs();
                 
                 // Show first clue
                 showCurrentClue();
+                
+                // Ensure the huntUIPanel is visible by setting a slight delay
+                setTimeout(() => {
+                    if (huntUIPanel.classList.contains('hidden')) {
+                        huntUIPanel.classList.remove('hidden');
+                        console.log("Hunt UI panel visibility enforced");
+                    }
+                }, 100);
             }, 300);
         }
     }, 100); // Update every 100ms for a smoother animation
@@ -1070,20 +1104,32 @@ function updateClickableEggs() {
 
 function showCurrentClue() {
     if (currentEggIndex < eggData.length) {
-        // Update clue text with animation
-        const clueElement = document.getElementById('current-clue');
-        clueElement.textContent = eggData[currentEggIndex].clue;
+        // Update clue text in the new unified UI
+        currentClueText.textContent = eggData[currentEggIndex].clue;
         
         // Update clue number counter
         document.getElementById('clue-number').textContent = (currentEggIndex + 1).toString();
         document.getElementById('total-clues').textContent = eggData.length.toString();
         
+        // Support legacy elements too (will be removed in future version)
+        if (currentClueTextLegacy) {
+            currentClueTextLegacy.textContent = eggData[currentEggIndex].clue;
+        }
+        if (document.getElementById('clue-number-old')) {
+            document.getElementById('clue-number-old').textContent = (currentEggIndex + 1).toString();
+        }
+        if (document.getElementById('total-clues-old')) {
+            document.getElementById('total-clues-old').textContent = eggData.length.toString();
+        }
+        
         // Apply highlight animation to signal new clue
-        const clueDisplay = document.getElementById('clue-display');
-        clueDisplay.classList.add('highlight-clue');
-        setTimeout(() => {
-            clueDisplay.classList.remove('highlight-clue');
-        }, 1000);
+        const clueContainer = document.querySelector('.hunt-clue-container');
+        if (clueContainer) {
+            clueContainer.classList.add('highlight-clue');
+            setTimeout(() => {
+                clueContainer.classList.remove('highlight-clue');
+            }, 1000);
+        }
         
         // Update which egg is clickable
         updateClickableEggs();
@@ -1130,6 +1176,11 @@ function eggFound(eggElement) {
   foundCount++;
   foundCountElement.textContent = foundCount;
   
+  // Update legacy counter too (will be removed in future version)
+  if (foundCountElementLegacy) {
+    foundCountElementLegacy.textContent = foundCount;
+  }
+  
   // Add haptic feedback for mobile devices if available
   if (touchEnabled && navigator.vibrate) {
     navigator.vibrate(100);
@@ -1175,8 +1226,8 @@ function eggFound(eggElement) {
       
       // Update UI
       currentClueText.textContent = 'All eggs found! Great job!';
-      floatingUI.style.backgroundColor = 'rgba(255, 215, 0, 0.8)';
-      floatingUI.style.border = '3px solid gold';
+      huntUIPanel.style.backgroundColor = 'rgba(255, 215, 0, 0.8)';
+      huntUIPanel.style.border = '3px solid gold';
     }, 500);
   }
 }
@@ -1286,13 +1337,22 @@ function showConfetti() {
 function resetGame() {
     // Go back to setup screen
     gameContainer.classList.add('hidden');
-    clueDisplay.classList.add('hidden');
-    floatingUI.classList.add('hidden');
+    huntUIPanel.classList.add('hidden');
+    
+    // Also hide legacy elements (will be removed in future version)
+    clueDisplayLegacy.classList.add('hidden');
+    floatingUILegacy.classList.add('hidden');
+    
+    // Show setup screen
     setupScreen.classList.remove('hidden');
     
     // Reset UI style
-    floatingUI.style.backgroundColor = 'rgba(255, 255, 255, 0.85)';
-    floatingUI.style.border = '3px solid #ffcccc';
+    huntUIPanel.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+    huntUIPanel.style.border = '3px solid #ffcccc';
+    
+    // Also reset legacy UI (will be removed in future version)
+    floatingUILegacy.style.backgroundColor = 'rgba(255, 255, 255, 0.85)';
+    floatingUILegacy.style.border = '3px solid #ffcccc';
 }
 
 // Initialize background file upload
@@ -1773,6 +1833,11 @@ function createPawprintTrail(fromEgg, toEgg) {
 // Add hint button functionality
 document.getElementById('hint-button').addEventListener('click', showHint);
 
+// Legacy hint button (will be deprecated)
+if (document.getElementById('hint-button-old')) {
+    document.getElementById('hint-button-old').addEventListener('click', showHint);
+}
+
 // Variable to track if a hint has been used for the current egg
 let hintUsed = false;
 
@@ -1786,6 +1851,13 @@ function showHint() {
     const hintButton = document.getElementById('hint-button');
     hintButton.classList.add('used');
     hintButton.textContent = 'Hint Shown';
+    
+    // Also update legacy hint button if it exists
+    const hintButtonLegacy = document.getElementById('hint-button-old');
+    if (hintButtonLegacy) {
+      hintButtonLegacy.classList.add('used');
+      hintButtonLegacy.textContent = 'Hint Shown';
+    }
     
     // Make current egg visible with a highlight effect
     const egg = document.querySelector(`.egg[data-egg-index="${currentEggIndex}"]`);
@@ -1807,6 +1879,14 @@ function resetHintButton() {
   const hintButton = document.getElementById('hint-button');
   hintButton.classList.remove('used');
   hintButton.textContent = 'Need a Hint?';
+  
+  // Also update legacy hint button if it exists
+  const hintButtonLegacy = document.getElementById('hint-button-old');
+  if (hintButtonLegacy) {
+    hintButtonLegacy.classList.remove('used');
+    hintButtonLegacy.textContent = 'Need a Hint?';
+  }
+  
   hintUsed = false;
 }
 
@@ -2011,7 +2091,10 @@ function initMoreSettings() {
 function initSettingsModal() {
     // Get DOM elements
     const settingsModal = document.getElementById('settings-modal');
-    const settingsBtn = document.querySelectorAll('#settings-btn'); // Multiple buttons with same ID
+    const settingsBtns = [
+        document.getElementById('settings-btn-setup'),
+        document.getElementById('settings-btn-game')
+    ];
     const closeBtn = document.getElementById('settings-close-btn');
     const volumeSlider = document.getElementById('settings-volume');
     const playPauseBtn = document.getElementById('settings-play-pause');
@@ -2042,9 +2125,9 @@ function initSettingsModal() {
         soundToggleBtn.textContent = soundEnabled ? '🔊' : '🔇';
     }
     
-    // Add event listeners to settings buttons (may be multiple)
-    settingsBtn.forEach(btn => {
-        btn.addEventListener('click', openSettingsModal);
+    // Add event listeners to settings buttons
+    settingsBtns.forEach(btn => {
+        if (btn) btn.addEventListener('click', openSettingsModal);
     });
     
     // Close button event

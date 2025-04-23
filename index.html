@@ -69,7 +69,7 @@
                 </div>
             </div>
         </div>
-        <button id="settings-btn" class="settings-btn" title="Game Settings">⚙️</button>
+        <button id="settings-btn-setup" class="settings-btn" title="Game Settings">⚙️</button>
     </div>
     
     <!-- Egg Edit Modal Dialog -->
@@ -119,22 +119,38 @@
     <!-- Game Screen -->
     <div id="game-container" class="screen hidden">
         <!-- Clickable egg areas will be added here by script.js -->
-        <button id="settings-btn" class="settings-btn" title="Game Settings">⚙️</button>
+        <button id="settings-btn-game" class="settings-btn" title="Game Settings">⚙️</button>
     </div>
     
-    <!-- Clue display -->
+    <!-- New Unified Hunt UI Panel - Now outside game-container for better z-index handling -->
+    <div id="hunt-ui-panel" class="hidden">
+        <h2>Easter Egg Hunt!</h2>
+        <div class="hunt-ui-counters">
+            <div class="clue-counter-display">Clue <span id="clue-number">1</span> of <span id="total-clues">0</span></div>
+            <div class="hunt-score">Eggs found: <span id="found-count">0</span>/<span id="total-count">0</span></div>
+        </div>
+        <div class="hunt-clue-container">
+            <p>Here is your clue:</p>
+            <div class="hunt-clue-text" id="current-clue"></div>
+        </div>
+        <button id="hint-button" class="control-btn">Need a Hint?</button>
+        <button id="reset-btn" class="main-btn">Reset Hunt</button>
+        <div class="easter-decoration">🐰 🥚 🐣</div>
+    </div>
+    
+    <!-- OLD Clue display - Will be removed once new UI is working -->
     <div id="clue-display" class="hidden">
         <h3>Find this egg:</h3>
-        <p id="current-clue"></p>
-        <div class="clue-counter">Clue <span id="clue-number">1</span> of <span id="total-clues">0</span></div>
-        <button id="hint-button" class="control-btn">Need a Hint?</button>
+        <p id="current-clue-old"></p>
+        <div class="clue-counter">Clue <span id="clue-number-old">1</span> of <span id="total-clues-old">0</span></div>
+        <button id="hint-button-old" class="control-btn">Need a Hint?</button>
     </div>
     
-    <!-- Floating UI -->
+    <!-- OLD Floating UI - Will be removed once new UI is working -->
     <div id="floating-ui" class="hidden">
         <h2>Easter Egg Hunt!</h2>
-        <div id="score">Eggs found: <span id="found-count">0</span>/<span id="total-count">0</span></div>
-        <button id="reset-btn">Reset Hunt</button>
+        <div id="score">Eggs found: <span id="found-count-old">0</span>/<span id="total-count-old">0</span></div>
+        <button id="reset-btn-old">Reset Hunt</button>
         <div class="easter-decoration">🐰 🥚 🐣</div>
     </div>
     
