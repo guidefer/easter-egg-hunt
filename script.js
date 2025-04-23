@@ -1850,7 +1850,7 @@ function showHint() {
     // Change hint button appearance
     const hintButton = document.getElementById('hint-button');
     hintButton.classList.add('used');
-    hintButton.textContent = 'Hint Shown';
+    hintButton.innerHTML = '✓'; // Change to checkmark when used
     
     // Also update legacy hint button if it exists
     const hintButtonLegacy = document.getElementById('hint-button-old');
@@ -1878,7 +1878,7 @@ function showHint() {
 function resetHintButton() {
   const hintButton = document.getElementById('hint-button');
   hintButton.classList.remove('used');
-  hintButton.textContent = 'Need a Hint?';
+  hintButton.innerHTML = '💡'; // Reset to lightbulb emoji
   
   // Also update legacy hint button if it exists
   const hintButtonLegacy = document.getElementById('hint-button-old');

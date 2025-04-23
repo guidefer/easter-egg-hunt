@@ -181,16 +181,6 @@ body, html {
     color: #8855dd;
 }
 
-#egg-editor input, 
-#egg-editor textarea {
-    width: 100%;
-    padding: 8px;
-    margin-top: 5px;
-    border: 1px solid #ffcccc;
-    border-radius: 4px;
-    font-family: inherit;
-}
-
 /* Form input styles */
 .form-group input,
 .form-group textarea,
@@ -376,7 +366,6 @@ body, html {
 #modal-save-btn,
 #modal-remove-btn,
 #modal-cancel-btn,
-#hint-button,
 #restart-btn,
 #reset-btn {
     border-radius: 8px;
@@ -394,7 +383,6 @@ body, html {
 #modal-save-btn:hover,
 #modal-remove-btn:hover,
 #modal-cancel-btn:hover,
-#hint-button:hover,
 #restart-btn:hover,
 #reset-btn:hover {
     background: #ff99cc;
@@ -437,27 +425,75 @@ body, html {
     background: #cc9999;
 }
 
-#hint-button {
-    margin-top: 10px;
-    background: #ffeecc;
-    border: 2px solid #ffcc99;
-    color: #cc6633;
-    padding: 8px 15px;
-    width: 100%;
+/* Circular buttons (icon buttons) - consolidated to reduce redundancy */
+.icon-button, .settings-btn, .hint-btn {
+    position: fixed;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.8);
+    border: 2px solid #ffcccc;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1001;
+    transition: all 0.3s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    line-height: 1;
+    padding: 0;
 }
 
-#hint-button:hover {
-    background: #ffcc99;
-    color: #994400;
+.icon-button:hover, .settings-btn:hover, .hint-btn:hover {
+    transform: scale(1.1);
+    background: #ffcccc;
 }
 
-#hint-button.used {
+/* Hint button positioning - specific to hint button */
+.hint-btn {
+    position: absolute; /* Changed from fixed to absolute for proper positioning */
+    top: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+}
+
+/* Hint button used state */
+.hint-btn.used {
     background: #f9e9f9;
     border-color: #dd99dd;
     color: #8855dd;
 }
 
-/* Egg animation variations - combined keyframe declarations */
+/* Make reset button smaller like modal buttons */
+#hunt-ui-panel #reset-btn {
+    margin: 10px auto;
+    width: auto;
+    max-width: none;
+    padding: 8px 15px;
+    font-size: 0.9em;
+}
+
+/* Icon button specific positioning */
+.icon-button {
+    bottom: 20px;
+    right: 20px;
+}
+
+/* Settings button specific positioning and hover effect */
+.settings-btn {
+    top: 15px;
+    right: 15px;
+    z-index: 120;
+}
+
+.settings-btn:hover {
+    transform: scale(1.1) rotate(15deg);
+}
+
+/* Egg animation keyframes - combined for better organization */
 @keyframes bobble {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-5px); }
@@ -578,7 +614,7 @@ body, html {
     margin: 0 5px;
 }
 
-/* Clue display */
+/* Clue display - legacy UI */
 #clue-display {
     position: fixed;
     top: 20px;
@@ -600,7 +636,7 @@ body, html {
     animation: highlight 1s ease;
 }
 
-/* Floating UI styles */
+/* Floating UI styles - legacy UI */
 #floating-ui {
     position: fixed;
     top: 20px;
@@ -631,46 +667,6 @@ body, html {
     margin: 10px 0;
     font-size: 1.2em;
     color: #8855dd;
-}
-
-/* Circular buttons (icon buttons) */
-.icon-button, .settings-btn {
-    position: fixed;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.8);
-    border: 2px solid #ffcccc;
-    font-size: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 1001;
-    transition: all 0.3s;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    line-height: 1;
-    padding: 0;
-}
-
-.icon-button:hover, .settings-btn:hover {
-    transform: scale(1.1);
-}
-
-.icon-button {
-    bottom: 20px;
-    right: 20px;
-}
-
-.settings-btn {
-    top: 15px;
-    right: 15px;
-    z-index: 120;
-}
-
-.settings-btn:hover {
-    transform: scale(1.1) rotate(15deg);
-    background: #ffcccc;
 }
 
 /* Modal Dialog */
@@ -889,8 +885,8 @@ body, html {
 }
 
 /* Enhanced touch support for buttons */
-.main-btn, .control-btn, #modal-save-btn, #modal-remove-btn, #modal-cancel-btn, #hint-button, 
-#restart-btn, #reset-btn, #file-upload-btn, #camera-capture {
+.main-btn, .control-btn, #modal-save-btn, #modal-remove-btn, #modal-cancel-btn, 
+#restart-btn, #reset-btn, #file-upload-btn, #camera-capture, .hint-btn {
     touch-action: manipulation; /* Prevents delay on touch devices */
     -webkit-tap-highlight-color: rgba(0,0,0,0); /* Removes the default mobile tap highlight */
     user-select: none; /* Prevents text selection when tapping */
@@ -1161,7 +1157,7 @@ body, html {
     border-radius: 8px;
 }
 
-/* New Unified Hunt UI Panel styles - updated z-index and positioning */
+/* New Unified Hunt UI Panel styles */
 #hunt-ui-panel {
     position: fixed;
     top: 50%;
@@ -1209,6 +1205,7 @@ body, html {
 }
 
 .hunt-clue-container {
+    position: relative; /* Important for absolute positioning of hint button */
     background-color: #fff1f8;
     border-radius: 12px;
     padding: 15px;
@@ -1229,22 +1226,6 @@ body, html {
     background: rgba(255, 255, 255, 0.6);
     border-radius: 8px;
     min-height: 2em;
-}
-
-#hunt-ui-panel .control-btn {
-    margin: 10px 0;
-}
-
-#hunt-ui-panel .main-btn {
-    margin: 10px auto;
-    width: 100%;
-    max-width: 300px;
-    background-color: #ffcccc;
-}
-
-#hunt-ui-panel .easter-decoration {
-    margin-top: 5px;
-    margin-bottom: 0;
 }
 
 /* Mobile responsiveness for hunt UI panel */
@@ -1402,6 +1383,6 @@ body, html {
 }
 
 /* Enhance active states for touch interactions */
-.egg:active, .setup-egg:active, .main-btn:active, .control-btn:active {
+.egg:active, .setup-egg:active, .main-btn:active, .control-btn:active, .hint-btn:active {
     transform: scale(0.95);
 }
