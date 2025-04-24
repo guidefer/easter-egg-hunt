@@ -1215,7 +1215,7 @@ body, html {
 
 /* Styles for collapsed panel */
 #hunt-ui-panel.collapsed .hunt-ui-content {
-    padding: 15px 20px 10px;
+    padding: 15px 10px 10px;
 }
 
 /* Hide everything except clue container when collapsed */
@@ -1303,7 +1303,7 @@ body, html {
     position: relative; /* Important for absolute positioning of hint button */
     background-color: #fff1f8;
     border-radius: 12px;
-    padding: 15px;
+    padding: 10px;
     border: 1px solid #ffcccc;
     margin: 10px 0;
 }
