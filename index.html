@@ -36,40 +36,47 @@
             </div>
             
             <div id="setup-controls">
-                <h2>Easter Egg Hunt Setup</h2>
-                
-                <div class="instructions">
-                    <p>Click anywhere on the room to place eggs, or click "Add Egg" below.</p>
-                    <p>Click on existing eggs to edit their clues.</p>
-                    <p>Drag eggs to reposition them.</p>
-                </div>
-                
-                <!-- Background selector - Final simplified layout -->
-                <div class="background-section">
-                    <h3>Custom Background:</h3>
-                    <div class="background-controls">
-                        <input type="file" id="background-upload" class="custom-file-input hidden" accept="image/*">
-                        <button id="file-upload-btn" class="control-btn" title="Upload an image">📂</button>
-                        <button id="camera-capture" class="control-btn" title="Take a picture with camera">📷</button>
+                <div class="setup-controls-content">
+                    <h2>Easter Egg Hunt Setup</h2>
+                    <button id="settings-btn-setup" class="settings-btn" title="Game Settings">⚙️</button>
+                    
+                    <div class="instructions">
+                        <p>Click anywhere on the room to place eggs, or click "Add Egg" below.</p>
+                        <p>Click on existing eggs to edit their clues.</p>
+                        <p>Drag eggs to reposition them.</p>
                     </div>
-                    <p class="helper-text">Images are processed locally and not uploaded to any server</p>
+                    
+                    <!-- Background selector - Final simplified layout -->
+                    <div class="background-section">
+                        <h3>Custom Background:</h3>
+                        <div class="background-controls">
+                            <input type="file" id="background-upload" class="custom-file-input hidden" accept="image/*">
+                            <button id="file-upload-btn" class="control-btn" title="Upload an image">📂</button>
+                            <button id="camera-capture" class="control-btn" title="Take a picture with camera">📷</button>
+                        </div>
+                        <p class="helper-text">Images are processed locally and not uploaded to any server</p>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button id="add-egg-btn" class="control-btn">Add Egg</button>
+                    </div>
+                    
+                    <h3>Your Eggs</h3>
+                    <div id="egg-list-container">
+                        <ul id="egg-list"></ul>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button id="start-game-btn" class="main-btn" disabled>Start the Hunt! (0 eggs)</button>
+                    </div>
                 </div>
-                
-                <div class="button-group">
-                    <button id="add-egg-btn" class="control-btn">Add Egg</button>
-                </div>
-                
-                <h3>Your Eggs</h3>
-                <div id="egg-list-container">
-                    <ul id="egg-list"></ul>
-                </div>
-                
-                <div class="button-group">
-                    <button id="start-game-btn" class="main-btn" disabled>Start the Hunt! (0 eggs)</button>
+                <div class="setup-controls-toggle">
+                    <button id="setup-controls-toggle-btn" class="toggle-btn" title="Expand/Collapse Panel">
+                        ▲
+                    </button>
                 </div>
             </div>
         </div>
-        <button id="settings-btn-setup" class="settings-btn" title="Game Settings">⚙️</button>
     </div>
     
     <!-- Egg Edit Modal Dialog -->
@@ -140,7 +147,7 @@
         </div>
         <div class="hunt-ui-toggle">
             <button id="hunt-ui-toggle-btn" class="icon-button toggle-btn" title="Expand/Collapse Panel">
-                <span class="toggle-arrow">↑</span>
+                ▲
             </button>
         </div>
     </div>

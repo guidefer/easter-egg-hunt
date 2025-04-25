@@ -105,8 +105,9 @@ body, html {
     overflow: hidden;
     /* Using CSS background-image */
     background-repeat: no-repeat;
-    background-size: contain;
+    background-size: cover;
     background-position: center;
+    height: 100vh;
 }
 
 #egg-placement-area {
@@ -117,19 +118,133 @@ body, html {
     z-index: 1; /* Above easter background but below eggs */
 }
 
+/* Setup Controls - Hunt UI Panel Style */
 #setup-controls {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
     width: 300px;
-    height: 100%;
+    max-height: 80%;
     padding: 20px;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    border: 3px solid #ffcccc;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
     overflow-y: auto;
-    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
-    z-index: 10;
+    z-index: 100;
+    transition: all 0.5s ease;
 }
 
-#setup-controls h2 {
+/* Collapsed state for setup controls */
+#setup-controls.collapsed {
+    width: 250px;
+    right: 10px;
+}
+
+/* Controls toggle buttons - shared styles */
+.setup-controls-toggle, .hunt-ui-toggle {
+    position: relative;
+    height: 0;
+    width: 100%;
+}
+
+/* Toggle button styling - shared for setup and hunt UI */
+.toggle-btn, #setup-controls-toggle-btn, #hunt-ui-toggle-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #ffcccc;
+    border: 2px solid #ff99cc;
     color: #ff66b3;
-    margin-top: 0;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    padding: 0;
+    line-height: 1;
+    z-index: 101;
+}
+
+/* Setup controls toggle positioning */
+.setup-controls-toggle #setup-controls-toggle-btn {
+    position: absolute;
+    bottom: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Hunt UI toggle positioning */
+.hunt-ui-toggle #hunt-ui-toggle-btn {
+    position: absolute;
+    bottom: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1600;
+}
+
+/* Toggle button hover effects */
+.toggle-btn:hover, #setup-controls-toggle-btn:hover, #hunt-ui-toggle-btn:hover {
+    background: #ff99cc;
+    color: white;
+    transform: translateX(-50%) scale(1.1);
+}
+
+/* Rotate arrow when collapsed */
+#setup-controls.collapsed .toggle-arrow,
+#hunt-ui-panel.collapsed .toggle-arrow {
+    transform: rotate(180deg);
+    display: inline-block;
+}
+
+/* Controls content container for animations */
+.setup-controls-content, .hunt-ui-content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    transition: max-height 0.5s ease, opacity 0.3s ease;
+    position: relative;
+}
+
+/* Setup controls header margin for settings button */
+.setup-controls-content h2 {
+    margin-right: 50px; /* Make space for settings button */
+}
+
+/* Position the settings button inside setup panel */
+#settings-btn-setup {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    z-index: 120;
+}
+
+/* Hide elements when controls are collapsed */
+#setup-controls.collapsed h2,
+#setup-controls.collapsed .instructions,
+#setup-controls.collapsed .background-section,
+#hunt-ui-panel.collapsed h2,
+#hunt-ui-panel.collapsed .hunt-ui-counters,
+#hunt-ui-panel.collapsed #reset-btn,
+#hunt-ui-panel.collapsed .easter-decoration {
+    display: none;
+}
+
+/* Adjust content padding when collapsed */
+#setup-controls.collapsed .setup-controls-content {
+    padding: 10px 5px;
+}
+
+#hunt-ui-panel.collapsed .hunt-ui-content {
+    padding: 15px 10px 10px;
+}
+
+/* Headings */
+#setup-controls h2, #hunt-ui-panel h2 {
+    color: #ff66b3;
+    margin-top: 10px;
 }
 
 #setup-controls h3 {
@@ -138,10 +253,11 @@ body, html {
     margin-bottom: 10px;
 }
 
+/* Egg list container */
 #egg-list-container {
     max-height: 200px;
     overflow-y: auto;
-    margin-bottom: 20px;
+    margin-bottom: 0px;
     border: 1px solid #ffcccc;
     border-radius: 8px;
     padding: 10px;
@@ -171,17 +287,20 @@ body, html {
     border: 1px solid #ff99cc;
 }
 
-#egg-editor {
-    margin-bottom: 20px;
+/* Form and input styles */
+.form-group, #egg-editor {
+    margin-bottom: 15px;
 }
 
+.form-group label,
 #egg-editor label {
     display: block;
     margin-top: 10px;
+    margin-bottom: 5px;
     color: #8855dd;
+    font-weight: bold;
 }
 
-/* Form input styles */
 .form-group input,
 .form-group textarea,
 #egg-editor input, 
@@ -194,15 +313,6 @@ body, html {
     font-family: inherit;
     background-color: #fff;
     font-size: 1em;
-}
-
-.form-group label,
-#egg-editor label {
-    display: block;
-    margin-top: 10px;
-    margin-bottom: 5px;
-    color: #8855dd;
-    font-weight: bold;
 }
 
 /* Instructions in setup */
@@ -226,6 +336,14 @@ body, html {
     flex-wrap: wrap;
     gap: 5px;
     margin-top: 10px;
+    justify-content: center;
+}
+
+/* Start game button positioning */
+#start-game-btn {
+    margin: 10px auto;
+    display: block;
+    width: fit-content;
 }
 
 /* Clue counter */
@@ -253,7 +371,6 @@ body, html {
     width: 48px;
     height: 48px;
     background: none;
-    z-index: 1000;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -262,10 +379,26 @@ body, html {
     margin: 0;
     padding: 0;
     transition: opacity 0.3s ease, transform 0.2s ease;
+    border: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Egg z-index levels */
+.egg {
+    z-index: 1000;
+    cursor: pointer;
+}
+
+.setup-egg {
+    z-index: 5;
+    cursor: move;
+    visibility: visible !important; /* Ensure eggs are always visible in setup mode */
 }
 
 /* Common styles for egg background */
 .egg::before, .setup-egg::before {
+    content: '🐰'; /* Use bunny emoji */
     background-color: rgba(255, 255, 255);
     border-radius: 50%;
     width: 48px;
@@ -274,20 +407,6 @@ body, html {
     align-items: center;
     justify-content: center;
     box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
-}
-
-/* Setup egg specific styles */
-.setup-egg {
-    cursor: move;
-    user-select: none;
-    z-index: 5;
-    visibility: visible !important; /* Ensure eggs are always visible in setup mode */
-}
-
-.setup-egg::before {
-    content: '🐰'; /* Use bunny emoji instead of egg */
-    position: relative;
-    z-index: 6;
 }
 
 /* Add egg number */
@@ -307,16 +426,7 @@ body, html {
     position: absolute;
     bottom: -2px;
     right: -2px;
-    z-index: 7; /* Increased z-index to be above the egg content */
-}
-
-/* Game egg specific styles */
-.egg {
-    cursor: pointer !important;
-    border: none;
-    background-color: transparent;
-    transition: transform 0.3s ease, opacity 0.5s ease;
-    animation: bobble 3s infinite ease-in-out;
+    z-index: 7;
 }
 
 /* Add checkmark to found eggs */
@@ -334,10 +444,10 @@ body, html {
 .egg.found {
     opacity: 1 !important;
     pointer-events: none;
-    color: rgba(0, 0, 0, 1) !important; /* Ensures text content (emoji) is fully opaque */
+    color: rgba(0, 0, 0, 1) !important;
 }
 
-/* Specific rule to ensure emoji content inside found eggs is fully visible */
+/* Ensure all elements within found eggs are visible */
 .egg.found::before,
 .egg.found::after,
 .egg.found > * {
@@ -345,26 +455,8 @@ body, html {
     visibility: visible !important;
 }
 
-/* Ensure found eggs are always visible */
-.egg.found {
-    opacity: 1 !important;
-    pointer-events: none;
-}
-
-/* Different bob animations for each egg to make them feel more lively */
-.egg:nth-child(odd) {
-    animation-delay: 0.3s;
-}
-
-.egg:nth-child(3n) {
-    animation-delay: 0.6s;
-}
-
-.egg:nth-child(3n+1) {
-    animation-delay: 0.9s;
-}
-
-.egg:hover {
+/* Egg hover effects */
+.egg:hover, .egg:focus {
     transform: scale(1.1);
     cursor: pointer !important;
     animation: none;
@@ -376,13 +468,22 @@ body, html {
     filter: drop-shadow(0px 0px 5px #ff66b3) drop-shadow(0px 0px 10px rgba(255, 255, 255));
 }
 
-/* New egg highlight - pink gradient background instead of just white */
+/* New egg highlight - pink gradient background */
 .new-egg::before {
     background: radial-gradient(circle, rgba(255,204,230,0.9) 0%, rgba(255,255,255) 100%);
     box-shadow: 0 0 8px rgba(255, 102, 179, 0.6);
 }
 
-/* Button styles - combined common properties */
+/* Egg hover reveal effect */
+.egg-hover-reveal {
+    border-radius: 50%;
+    animation: egg-glow 1.5s infinite alternate;
+    cursor: pointer;
+    filter: drop-shadow(0 0 8px rgba(255, 102, 179, 0.8));
+    box-shadow: 0 0 15px 8px rgba(255, 204, 102, 0.8);
+}
+
+/* Button styles - common properties */
 .main-btn,
 .control-btn,
 #modal-save-btn,
@@ -397,6 +498,9 @@ body, html {
     border: 2px solid #ff99cc;
     background: #ffcccc;
     color: #cc6699;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    user-select: none;
 }
 
 /* Button hover states */
@@ -412,12 +516,23 @@ body, html {
     transform: scale(1.05);
 }
 
+/* Button active states */
+.main-btn:active,
+.control-btn:active,
+.hint-btn:active,
+.egg:active,
+.setup-egg:active {
+    transform: scale(0.95);
+}
+
 /* Main button specific styles */
 .main-btn {
-    padding: 15px 30px;
+    padding: 10px 10px;
+    align-items: center;
+    justify-content: center;
     font-size: 1.2em;
     border-radius: 10px;
-    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 /* Control button specific styles */
@@ -447,9 +562,19 @@ body, html {
     background: #cc9999;
 }
 
-/* Circular buttons (icon buttons) - consolidated to reduce redundancy */
-.icon-button, .settings-btn, .hint-btn {
-    position: fixed;
+/* Reset button in hunt UI panel */
+#hunt-ui-panel #reset-btn {
+    margin: 10px auto;
+    width: auto;
+    max-width: none;
+    padding: 8px 15px;
+    font-size: 0.9em;
+}
+
+/* Circular buttons (icon buttons) - consolidated styles */
+.icon-button,
+.settings-btn,
+.hint-btn {
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -467,14 +592,35 @@ body, html {
     padding: 0;
 }
 
-.icon-button:hover, .settings-btn:hover, .hint-btn:hover {
+/* Icon button hover effects */
+.icon-button:hover,
+.settings-btn:hover,
+.hint-btn:hover {
     transform: scale(1.1);
     background: #ffcccc;
 }
 
-/* Hint button positioning - specific to hint button */
+/* Icon button positions */
+.icon-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}
+
+.settings-btn {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    z-index: 120;
+}
+
+.settings-btn:hover {
+    transform: scale(1.1) rotate(15deg);
+}
+
+/* Hint button positioning */
 .hint-btn {
-    position: absolute; /* Changed from fixed to absolute for proper positioning */
+    position: absolute;
     top: 2px;
     right: 2px;
     width: 36px;
@@ -489,33 +635,7 @@ body, html {
     color: #8855dd;
 }
 
-/* Make reset button smaller like modal buttons */
-#hunt-ui-panel #reset-btn {
-    margin: 10px auto;
-    width: auto;
-    max-width: none;
-    padding: 8px 15px;
-    font-size: 0.9em;
-}
-
-/* Icon button specific positioning */
-.icon-button {
-    bottom: 20px;
-    right: 20px;
-}
-
-/* Settings button specific positioning and hover effect */
-.settings-btn {
-    top: 15px;
-    right: 15px;
-    z-index: 120;
-}
-
-.settings-btn:hover {
-    transform: scale(1.1) rotate(15deg);
-}
-
-/* Egg animation keyframes - combined for better organization */
+/* Egg animation keyframes */
 @keyframes bobble {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-5px); }
@@ -540,6 +660,11 @@ body, html {
 @keyframes pulse {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.1); }
+}
+
+@keyframes egg-glow {
+    from { filter: drop-shadow(0 0 8px rgba(255, 102, 179, 0.8)); }
+    to { filter: drop-shadow(0 0 15px rgba(255, 102, 179, 0.9)); }
 }
 
 @keyframes newEggPulse {
@@ -583,12 +708,25 @@ body, html {
     to { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(var(--rotation)); }
 }
 
+@keyframes celebrate {
+    0% { opacity: 0; transform: scale(0) rotate(0deg); }
+    25% { opacity: 1; transform: scale(1.2) rotate(20deg); }
+    50% { opacity: 1; transform: scale(0.9) rotate(-15deg); }
+    75% { opacity: 1; transform: scale(1.1) rotate(5deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
 /* Apply different animations to eggs based on their class */
 .egg.animation-bobble { animation: bobble 3s infinite ease-in-out; }
 .egg.animation-spin { animation: spin 8s infinite linear; }
 .egg.animation-wiggle { animation: wiggle 2s infinite ease-in-out; }
 .egg.animation-bounce { animation: bounce 2.5s infinite ease-in-out; }
 .egg.animation-pulse { animation: pulse 3s infinite ease-in-out; }
+
+/* Different animation timings for eggs */
+.egg:nth-child(odd) { animation-delay: 0.3s; }
+.egg:nth-child(3n) { animation-delay: 0.6s; }
+.egg:nth-child(3n+1) { animation-delay: 0.9s; }
 
 /* Dynamic background elements */
 .background-bunny {
@@ -636,7 +774,7 @@ body, html {
     margin: 0 5px;
 }
 
-/* Clue display - legacy UI */
+/* Legacy UI elements */
 #clue-display {
     position: fixed;
     top: 20px;
@@ -653,12 +791,6 @@ body, html {
     transform-origin: top left;
 }
 
-/* Highlighted clue when new clue appears */
-.highlight-clue {
-    animation: highlight 1s ease;
-}
-
-/* Floating UI styles - legacy UI */
 #floating-ui {
     position: fixed;
     top: 20px;
@@ -723,10 +855,6 @@ body, html {
     text-align: center;
 }
 
-.form-group {
-    margin-bottom: 15px;
-}
-
 .helper-text {
     font-size: 0.75em;
     color: #888;
@@ -736,12 +864,9 @@ body, html {
     text-align: center;
 }
 
-#background-select {
-    cursor: pointer;
-}
-
+/* Congratulations modal specific styles */
 #congrats-modal .easter-decoration {
-    font-size: 28px; /* Slightly larger decoration */
+    font-size: 28px;
     margin: 15px 0;
     letter-spacing: 3px;
 }
@@ -753,13 +878,18 @@ body, html {
 }
 
 #restart-btn {
-    margin: 20px auto; /* Center button with auto margins */
-    display: block; /* Make button a block element for proper centering */
+    margin: 20px auto;
+    display: block;
+}
+
+/* Background selection */
+#background-select {
+    cursor: pointer;
 }
 
 /* Custom file input styling */
 .custom-file-input {
-    font-family: 'Comic Sans MS', cursive, sans-serif;
+    font-family: inherit;
     background-color: #ffcccc;
     border: 2px solid #ff99cc;
     border-radius: 8px;
@@ -769,7 +899,7 @@ body, html {
     transition: all 0.3s;
 }
 
-/* Camera button styles */
+/* Camera and file upload buttons */
 #camera-capture, #file-upload-btn {
     padding: 5px 10px;
     font-size: 1.2rem;
@@ -832,17 +962,17 @@ body, html {
     background: #ffcccc;
 }
 
-/* Styling for the background image */
+/* Background image */
 .background-img {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Changed from contain to cover for better filling */
-    z-index: 0; /* Behind other elements */
-    max-width: none; /* Allow image to scale beyond container width if needed */
-    max-height: 100%; /* Limit height to container height */
+    object-fit: cover;
+    z-index: 0;
+    max-width: none;
+    max-height: 100%;
     margin: 0 auto;
 }
 
@@ -850,7 +980,7 @@ body, html {
 .pawprint {
     position: absolute;
     font-size: 16px;
-    color: rgba(139, 69, 19, 0.8); /* Brown color for pawprints */
+    color: rgba(139, 69, 19, 0.8);
     filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.7));
     z-index: 500;
     pointer-events: none;
@@ -904,14 +1034,6 @@ body, html {
     color: #8855dd;
     font-size: 1.1em;
     text-align: center;
-}
-
-/* Enhanced touch support for buttons */
-.main-btn, .control-btn, #modal-save-btn, #modal-remove-btn, #modal-cancel-btn, 
-#restart-btn, #reset-btn, #file-upload-btn, #camera-capture, .hint-btn {
-    touch-action: manipulation; /* Prevents delay on touch devices */
-    -webkit-tap-highlight-color: rgba(0,0,0,0); /* Removes the default mobile tap highlight */
-    user-select: none; /* Prevents text selection when tapping */
 }
 
 /* Touch active state for better mobile feedback */
@@ -1026,7 +1148,6 @@ body, html {
     position: relative;
 }
 
-/* Close button for settings modal - fixed positioning */
 #settings-modal .close-btn {
     position: absolute;
     top: 15px;
@@ -1190,9 +1311,9 @@ body, html {
     border: 3px solid #ffcccc;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
     text-align: center;
-    z-index: 1500; /* Increased z-index to ensure visibility */
+    z-index: 1500;
     transition: all 0.5s ease;
-    top: 50%; /* Default center position when expanded */
+    top: 50%;
     transform: translate(-50%, -50%);
 }
 
@@ -1200,86 +1321,23 @@ body, html {
 #hunt-ui-panel.collapsed {
     top: 20px;
     transform: translateX(-50%) translateY(0);
-    max-width: 90%;
+    max-width: 60%;
     border-radius: 15px;
 }
 
 /* Content container for animations */
 .hunt-ui-content {
     padding: 20px 25px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    transition: max-height 0.5s ease, opacity 0.3s ease;
 }
 
-/* Styles for collapsed panel */
-#hunt-ui-panel.collapsed .hunt-ui-content {
-    padding: 15px 10px 10px;
-}
-
-/* Hide everything except clue container when collapsed */
-#hunt-ui-panel.collapsed h2,
-#hunt-ui-panel.collapsed .hunt-ui-counters,
-#hunt-ui-panel.collapsed #reset-btn,
-#hunt-ui-panel.collapsed .easter-decoration {
-    display: none;
-}
-
-/* Toggle button container */
-.hunt-ui-toggle {
-    position: relative; 
-    height: 0;
-    width: 100%;
-}
-
-/* Toggle button styling */
-.toggle-btn {
-    position: absolute;
-    bottom: -18px; /* Position at bottom edge */
-    left: 50%;
-    transform: translateX(-50%);
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: #ffcccc;
-    border: 2px solid #ff99cc;
-    color: #ff66b3;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 1600; /* Above panel */
-    transition: transform 0.3s ease, background-color 0.3s ease;
-    padding: 0;
-    line-height: 1;
-}
-
-.toggle-btn:hover {
-    background: #ff99cc;
-    color: white;
-    transform: translateX(-50%) scale(1.1);
-}
-
-/* Rotate arrow when collapsed */
-#hunt-ui-panel.collapsed .toggle-arrow {
-    transform: rotate(180deg);
-    display: inline-block;
-}
-
-/* Adjust hunt clue container in collapsed mode */
-#hunt-ui-panel.collapsed .hunt-clue-container {
-    margin: 0;
-}
-
+/* Hunt UI panel header */
 #hunt-ui-panel h2 {
-    color: #ff66b3;
     margin: 0 0 10px 0;
     text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
     font-size: 1.8em;
 }
 
+/* Hunt UI counters */
 .hunt-ui-counters {
     display: flex;
     justify-content: space-between;
@@ -1299,8 +1357,9 @@ body, html {
     font-weight: bold;
 }
 
+/* Hunt clue container */
 .hunt-clue-container {
-    position: relative; /* Important for absolute positioning of hint button */
+    position: relative;
     background-color: #fff1f8;
     border-radius: 12px;
     padding: 10px;
@@ -1320,30 +1379,17 @@ body, html {
     padding: 8px;
     background: rgba(255, 255, 255, 0.6);
     border-radius: 8px;
-    min-height: 2em;
+    min-height: 1.2em;
 }
 
-/* Mobile responsiveness for hunt UI panel */
-@media (max-width: 768px) {
-    #hunt-ui-panel {
-        width: 90%;
-    }
-    
-    #hunt-ui-panel .hunt-ui-content {
-        padding: 15px;
-    }
-    
-    #hunt-ui-panel h2 {
-        font-size: 1.5em;
-    }
-    
-    .hunt-ui-counters {
-        font-size: 0.9em;
-    }
+/* Highlight clue when new clue appears */
+.highlight-clue {
+    animation: highlight 1s ease;
 }
 
-/* Responsive design improvements */
+/* Responsive design */
 @media (max-width: 768px) {
+    /* Setup and content layout */
     #setup-container {
         flex-direction: column;
     }
@@ -1362,7 +1408,7 @@ body, html {
         bottom: 70px;
     }
     
-    /* Mobile-specific improvements */
+    /* UI panels */
     #clue-display, #floating-ui {
         width: calc(100% - 40px);
         max-width: 100%;
@@ -1385,6 +1431,24 @@ body, html {
         animation: none; /* Remove floating animation on mobile */
     }
     
+    /* Hunt UI panel */
+    #hunt-ui-panel {
+        width: 90%;
+    }
+    
+    #hunt-ui-panel .hunt-ui-content {
+        padding: 15px;
+    }
+    
+    #hunt-ui-panel h2 {
+        font-size: 1.5em;
+    }
+    
+    .hunt-ui-counters {
+        font-size: 0.9em;
+    }
+    
+    /* Modal adjustments */
     .modal-content {
         width: 95%;
         max-width: 90%;
@@ -1392,14 +1456,14 @@ body, html {
         box-sizing: border-box;
     }
     
-    /* Make buttons larger on touch screens */
+    /* Larger touch targets */
     .control-btn, .main-btn, #modal-save-btn, #modal-remove-btn, #modal-cancel-btn {
         padding: 12px 20px;
         min-height: 44px; /* Minimum touch target size */
         margin: 8px 4px;
     }
     
-    /* Increase egg size for easier tapping */
+    /* Larger eggs for touch */
     .egg, .setup-egg {
         width: 56px;
         height: 56px;
@@ -1411,36 +1475,35 @@ body, html {
         height: 56px;
     }
     
-    /* Ensure forms are usable on mobile */
+    /* Form optimizations */
     input, textarea, button {
         font-size: 16px; /* Prevents iOS zoom on focus */
     }
     
-    /* Fix UI cropping on iPhones with vertical aspect ratio */
+    /* Container sizing */
     #setup-container {
         max-width: 100%;
         overflow-x: hidden;
     }
     
-    /* Adjust setup controls for better mobile experience */
     #setup-controls {
         box-sizing: border-box;
         padding: 15px;
         overflow-y: auto;
     }
     
-    /* Ensure camera modal interface is properly sized */
+    /* Camera modal sizing */
     .camera-container {
         width: 90%;
     }
     
-    /* Stack buttons on very small screens */
+    /* Button layout */
     .button-group {
         flex-direction: column;
     }
 }
 
-/* For even smaller screens (phones) */
+/* For small phones */
 @media (max-width: 480px) {
     #start-screen h1 {
         font-size: 2em;
@@ -1460,84 +1523,4 @@ body, html {
         right: 5px;
         font-size: 0.7em;
     }
-}
-
-/* Enhance active states for touch interactions */
-.egg:active, .setup-egg:active, .main-btn:active, .control-btn:active, .hint-btn:active {
-    transform: scale(0.95);
-}
-
-/* Egg styles */
-.egg {
-    position: absolute;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255);
-    border: 2px solid #ff99cc;
-    font-size: 22px;
-    line-height: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    transform: translate(-50%, -50%);
-    transition: transform 0.3s, background-color 0.3s, opacity 0.3s ease;
-    z-index: 1000;
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-    text-decoration: none;
-    box-sizing: content-box;
-    -webkit-tap-highlight-color: transparent; /* Prevents tap highlight on mobile */
-    user-select: none;
-}
-
-.egg:hover, .egg:focus {
-    transform: translate(-50%, -50%) scale(1.1);
-    background-color: rgba(255, 255, 255, 0.7);
-}
-
-/* Special hover reveal effect */
-.egg-hover-reveal {
-    box-shadow: 0 0 15px 8px rgba(255, 204, 102, 0.8);
-    filter: drop-shadow(0 0 10px #ffcc66) brightness(1.2);
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { transform: translate(-50%, -50%) scale(1); }
-    50% { transform: translate(-50%, -50%) scale(1.15); }
-}
-
-/* Celebration animation when egg is found */
-@keyframes celebrate {
-    0% { opacity: 0; transform: scale(0) rotate(0deg); }
-    25% { opacity: 1; transform: scale(1.2) rotate(20deg); }
-    50% { opacity: 1; transform: scale(0.9) rotate(-15deg); }
-    75% { opacity: 1; transform: scale(1.1) rotate(5deg); }
-    100% { opacity: 1; transform: scale(1) rotate(0deg); }
-}
-
-/* Egg hover reveal effect */
-.egg-hover-reveal {
-    animation: egg-glow 1.5s infinite alternate;
-    cursor: pointer;
-    filter: drop-shadow(0 0 8px rgba(255, 102, 179, 0.8));
-}
-
-@keyframes egg-glow {
-    from {
-        filter: drop-shadow(0 0 8px rgba(255, 102, 179, 0.8));
-    }
-    to {
-        filter: drop-shadow(0 0 15px rgba(255, 102, 179, 0.9));
-    }
-}
-
-/* Smooth opacity transition for eggs */
-.egg {
-    transition: opacity 0.3s ease, transform 0.2s ease;
-}
-
-.egg:hover {
-    transform: scale(1.1);
 }

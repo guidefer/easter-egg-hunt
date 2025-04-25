@@ -75,6 +75,43 @@ This project is an HTML, CSS, and JavaScript Easter egg hunt game with the follo
   - State updates through specific functions
   - UI updates following state changes
 
+## JavaScript Syntax Best Practices
+- Prefer standard string concatenation with + operators over template literals (backticks) for compatibility:
+  ```javascript
+  // Prefer this:
+  console.log('Creating pawprint trail from (' + fromLeft + '%, ' + fromTop + '%) to (' + toLeft + '%, ' + toTop + '%)');
+  
+  // Instead of this:
+  console.log(`Creating pawprint trail from (${fromLeft}%, ${fromTop}%) to (${toLeft}%, ${toTop}%)`);
+  ```
+- When creating CSS in JavaScript, use string concatenation for readability:
+  ```javascript
+  styleTag.textContent = 
+    '@keyframes fadeInPawprint {' +
+    '  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5) rotate(var(--rotation)); }' +
+    '  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) rotate(var(--rotation)) translateY(-10px); }' +
+    '  100% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(var(--rotation)) translateY(0); }' +
+    '}';
+  ```
+- For dynamic element styling, use standard concatenation for property values:
+  ```javascript
+  // Prefer this:
+  pawprint.style.left = pawLeft + '%';
+  pawprint.style.top = pawTop + '%';
+  
+  // Instead of this:
+  pawprint.style.left = `${pawLeft}%`;
+  pawprint.style.top = `${pawTop}%`;
+  ```
+- When using setTimeout with string manipulation, avoid template literals in favor of concatenation:
+  ```javascript
+  pawprint.style.animation = 'fadeInPawprint 0.8s forwards ' + (i * 0.1) + 's';
+  ```
+- Follow proper ternary operator syntax with consistent spacing and line breaks:
+  ```javascript
+  const rotation = (i % 2 === 0) ? '25deg' : '-25deg';
+  ```
+
 ## Modal System
 - Follow the existing pattern for showing/hiding modals
 - Use the `hidden` class toggle for visibility
