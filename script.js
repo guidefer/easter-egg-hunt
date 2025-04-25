@@ -13,10 +13,12 @@ let isNewEgg = false; // Flag to track if we're creating a new egg or editing ex
 let currentBackground = 'Living-room.png'; // Track the current background image
 let touchEnabled = 'ontouchstart' in window; // Detect if device supports touch
 let huntUIPanelCollapsed = false; // Track if the hunt UI panel is collapsed
+let setupControlsCollapsed = false; // Track if the setup controls panel is collapsed
 let autoCollapseTimerId = null; // Timer for auto-collapsing the hunt UI panel
+let setupAutoCollapseTimerId = null; // Timer for auto-collapsing the setup controls
 
 // Game version - update this when making significant changes
-const GAME_VERSION = '1.3.1'; // Updated version number for UI changes
+const GAME_VERSION = '1.3.2'; // Updated version number for collapsible setup controls
 
 // Sound effects using the Web Audio API
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -314,11 +316,14 @@ const currentClueTextLegacy = document.getElementById('current-clue-old');
 const foundCountElementLegacy = document.getElementById('found-count-old');
 const totalCountElementLegacy = document.getElementById('total-count-old');
 
-// Setup buttons
+// Start the game when setup is done
 document.getElementById('setup-btn').addEventListener('click', startSetupWithLoading);
 document.getElementById('add-egg-btn').addEventListener('click', showAddEggModal);
 document.getElementById('start-game-btn').addEventListener('click', startGame);
 document.getElementById('reset-btn').addEventListener('click', resetGame);
+
+// Add event listener for setup controls toggle button
+document.getElementById('setup-controls-toggle-btn').addEventListener('click', toggleSetupControls);
 
 // Legacy reset button (will be deprecated)
 if (document.getElementById('reset-btn-old')) {
@@ -388,110 +393,207 @@ window.onload = function() {
   initSettingsModal();
 };
 
-// Update version number in the UI
-function updateVersionDisplay() {
-  const versionElement = document.getElementById('game-version');
-  if (versionElement) {
-    versionElement.textContent = GAME_VERSION;
-  }
-}
-
-// Add a canvas for confetti effects
-function addConfettiCanvas() {
-  const canvas = document.createElement('canvas');
-  canvas.id = 'confetti-canvas';
-  canvas.style.position = 'fixed';
-  canvas.style.top = '0';
-  canvas.style.left = '0';
-  canvas.style.width = '100%';
-  canvas.style.height = '100%';
-  canvas.style.pointerEvents = 'none';
-  canvas.style.zIndex = '9999';
-  canvas.style.display = 'none';
-  document.body.appendChild(canvas);
-}
-
-// Ensure viewport meta tag is present
-function ensureViewportMeta() {
-  if (!document.querySelector('meta[name="viewport"]')) {
-    const meta = document.createElement('meta');
-    meta.name = 'viewport';
-    meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
-    document.getElementsByTagName('head')[0].appendChild(meta);
-  }
-}
-
-// Initialize FastClick to eliminate the 300ms click delay on touch devices
-function initFastClick() {
-  if (touchEnabled) {
-    document.addEventListener('DOMContentLoaded', function() {
-      // Apply touch-action manipulation to all interactive elements
-      document.body.style.touchAction = 'manipulation';
-      
-      // Enhanced touch event handlers for all buttons
-      const enhanceButtonTouchSupport = () => {
-        // Find all buttons and button-like elements
-        const buttons = document.querySelectorAll('button, .main-btn, .control-btn, .egg, .setup-egg, .more-settings-toggle');
-        buttons.forEach(button => {
-          // Remove existing touch handlers if any, to prevent duplicates
-          button.removeEventListener('touchstart', handleTouchStart);
-          button.removeEventListener('touchend', handleTouchEnd);
-          
-          // Add active state for visual feedback
-          button.addEventListener('touchstart', handleTouchStart, { passive: true });
-          button.addEventListener('touchend', handleTouchEnd);
-        });
-      };
-      
-      // Touch handlers for better visual feedback and reliability
-      function handleTouchStart(e) {
-        // Add an active state class
-        this.classList.add('touch-active');
+/**
+ * Initialize the Hunt UI panel toggle functionality
+ * This sets up event listeners and initial state for the collapsible hunt UI panel
+ */
+function initHuntUIPanelToggle() {
+  const huntUIPanel = document.getElementById('hunt-ui-panel');
+  const toggleBtn = document.getElementById('hunt-ui-toggle-btn');
+  
+  if (!huntUIPanel || !toggleBtn) return;
+  
+  // Set initial state
+  huntUIPanelCollapsed = false;
+  toggleBtn.setAttribute('aria-expanded', 'true');
+  
+  // Add click event listener to toggle button
+  toggleBtn.addEventListener('click', toggleHuntUIPanel);
+  
+  // Also add event listener to the clue container to expand when clicked in collapsed state
+  const clueContainer = document.querySelector('.hunt-clue-container');
+  if (clueContainer) {
+    clueContainer.addEventListener('click', function(e) {
+      // Only expand if we didn't click on the hint button
+      if (e.target.id !== 'hint-button' && huntUIPanelCollapsed) {
+        expandHuntUIPanel();
       }
-      
-      function handleTouchEnd(e) {
-        // Remove the active state
-        this.classList.remove('touch-active');
-        
-        // Stop event propagation to prevent unwanted clicks
-        e.stopPropagation();
-        
-        // Small delay to ensure click event is processed
-        setTimeout(() => {
-          // Check if this was a tap rather than a drag
-          const target = e.currentTarget;
-          if (target && !target.classList.contains('setup-egg')) {
-            // For non-draggable elements, trigger a click
-            if (!e.defaultPrevented) {
-              // Create and dispatch a click event
-              const clickEvent = new MouseEvent('click', {
-                bubbles: true,
-                cancelable: true,
-                view: window
-              });
-              target.dispatchEvent(clickEvent);
-            }
-          }
-        }, 10);
-      }
-      
-      // Initial enhancement
-      enhanceButtonTouchSupport();
-      
-      // Re-enhance after any screen changes
-      ['setup-btn', 'start-game-btn', 'reset-btn'].forEach(btnId => {
-        const btn = document.getElementById(btnId);
-        if (btn) {
-          const originalClick = btn.onclick;
-          btn.onclick = function(e) {
-            if (originalClick) originalClick.call(this, e);
-            // Re-apply touch enhancements after a delay to allow screen changes
-            setTimeout(enhanceButtonTouchSupport, 500);
-          };
-        }
-      });
     });
   }
+}
+
+/**
+ * Toggle the hunt UI panel between collapsed and expanded states
+ */
+function toggleHuntUIPanel() {
+  const huntUIPanel = document.getElementById('hunt-ui-panel');
+  const toggleBtn = document.getElementById('hunt-ui-toggle-btn');
+  
+  if (!huntUIPanel || !toggleBtn) return;
+  
+  // Toggle collapsed state
+  huntUIPanelCollapsed = !huntUIPanelCollapsed;
+  
+  // Update panel class and ARIA attributes
+  if (huntUIPanelCollapsed) {
+    huntUIPanel.classList.add('collapsed');
+    toggleBtn.setAttribute('aria-expanded', 'false');
+    toggleBtn.innerHTML = '▼'; // Down arrow - consistent with setup controls
+  } else {
+    huntUIPanel.classList.remove('collapsed');
+    toggleBtn.setAttribute('aria-expanded', 'true');
+    toggleBtn.innerHTML = '▲'; // Up arrow - consistent with setup controls
+  }
+  
+  // Reset auto-collapse timer
+  startAutoCollapseTimer();
+  
+  console.log('Hunt UI panel ' + (huntUIPanelCollapsed ? 'collapsed' : 'expanded'));
+}
+
+/**
+ * Expand the hunt UI panel and optionally start the auto-collapse timer
+ * @param {boolean} startTimer - Whether to start the auto-collapse timer (default: true)
+ */
+function expandHuntUIPanel(startTimer = true) {
+  const huntUIPanel = document.getElementById('hunt-ui-panel');
+  const toggleBtn = document.getElementById('hunt-ui-toggle-btn');
+  
+  if (!huntUIPanel || !toggleBtn) return;
+  
+  // Only do something if the panel is currently collapsed
+  if (huntUIPanelCollapsed) {
+    // Update collapsed state
+    huntUIPanelCollapsed = false;
+    
+    // Update panel class and ARIA attributes
+    huntUIPanel.classList.remove('collapsed');
+    toggleBtn.setAttribute('aria-expanded', 'true');
+    
+    console.log('Hunt UI panel auto-expanded');
+  }
+  
+  // Clear any existing auto-collapse timer
+  if (autoCollapseTimerId) {
+    clearTimeout(autoCollapseTimerId);
+  }
+  
+  // Start a new auto-collapse timer if requested
+  if (startTimer) {
+    startAutoCollapseTimer();
+  }
+}
+
+/**
+ * Start or restart the auto-collapse timer for the hunt UI panel
+ * Panel will auto-collapse after 5 seconds of inactivity
+ */
+function startAutoCollapseTimer() {
+  // Clear any existing timer
+  if (autoCollapseTimerId) {
+    clearTimeout(autoCollapseTimerId);
+  }
+  
+  // Set new timer to collapse after 5 seconds
+  autoCollapseTimerId = setTimeout(() => {
+    if (!huntUIPanelCollapsed) {
+      // Only collapse if currently expanded
+      toggleHuntUIPanel();
+    }
+  }, 5000); // 5 seconds
+}
+
+/**
+ * Create a celebrating bunny animation near a found egg
+ * @param {string} left - Left position of the bunny (e.g., '50%')
+ * @param {string} top - Top position of the bunny (e.g., '50%')
+ */
+function createCelebratingBunny(left, top) {
+  // Convert position to numbers (remove % if present)
+  const leftValue = parseFloat(left);
+  const topValue = parseFloat(top);
+  
+  // Create bunny element
+  const bunny = document.createElement('div');
+  bunny.className = 'background-bunny';
+  bunny.textContent = '🐰';
+  bunny.style.position = 'absolute';
+  bunny.style.zIndex = '600'; // Above pawprints but below UI
+  bunny.style.fontSize = '32px'; // Larger than normal background bunnies
+  
+  // Set position with a slight offset from the egg
+  bunny.style.left = `${leftValue + (Math.random() * 10 - 5)}%`;
+  bunny.style.top = `${topValue + (Math.random() * 10 - 5)}%`;
+  
+  // Create custom animation for celebration
+  const animDuration = 2 + Math.random() * 2; // 2-4 seconds
+  const jumpHeight = 20 + Math.random() * 30; // 20-50px
+  
+  // Create animation style if it doesn't exist
+  if (!document.querySelector('#bunny-celebration-style')) {
+    const style = document.createElement('style');
+    style.id = 'bunny-celebration-style';
+    style.innerHTML = `
+      @keyframes bunny-celebrate {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        25% { transform: translateY(-${jumpHeight}px) rotate(-10deg); }
+        50% { transform: translateY(0) rotate(0deg); }
+        75% { transform: translateY(-${jumpHeight * 0.6}px) rotate(10deg); }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  // Apply the animation
+  bunny.style.animation = `bunny-celebrate ${animDuration}s ease-in-out`;
+  
+  // Add to game container
+  gameContainer.appendChild(bunny);
+  
+  // Remove after animation completes
+  setTimeout(() => {
+    if (bunny.parentNode) {
+      // Apply a fade out animation
+      bunny.style.transition = 'opacity 0.5s, transform 0.5s';
+      bunny.style.opacity = '0';
+      bunny.style.transform = 'translateY(-20px)';
+      
+      // Remove from DOM after fade out
+      setTimeout(() => {
+        if (bunny.parentNode) {
+          bunny.remove();
+        }
+      }, 500);
+    }
+  }, animDuration * 1000);
+  
+  return bunny;
+}
+
+// Fix for startSetupWithLoading function
+function startSetupWithLoading() {
+    // Show loading screen
+    startScreen.classList.add('hidden');
+    const setupLoadingScreen = document.getElementById('setup-loading-screen');
+    setupLoadingScreen.classList.remove('hidden');
+    
+    // Simulate loading process
+    let progress = 0;
+    const loadingBar = document.getElementById('setup-loading-bar');
+    const loadingInterval = setInterval(() => {
+        progress += 10; // Faster progress for setup
+        loadingBar.style.width = `${progress}%`;
+        
+        if (progress >= 100) {
+            clearInterval(loadingInterval);
+            
+            // Hide loading screen and show setup screen after a small delay
+            setTimeout(() => {
+                setupLoadingScreen.classList.add('hidden');
+                showSetupScreen();
+            }, 300);
+        }
+    }, 80); // Slightly faster update for setup
 }
 
 // ------ Modal Functions ------
@@ -638,9 +740,21 @@ function showSetupScreen() {
     
     // Setup area for both click and touch
     addAreaEventListeners(eggPlacementArea);
+    
+    // Initialize setup controls toggle with expanded state
+    setupControlsCollapsed = false;
+    const setupControls = document.getElementById('setup-controls');
+    const toggleBtn = document.getElementById('setup-controls-toggle-btn');
+    
+    if (setupControls && toggleBtn) {
+        setupControls.classList.remove('collapsed');
+        toggleBtn.setAttribute('aria-expanded', 'true');
+        
+        // Start auto-collapse timer (collapse after 8 seconds)
+        startSetupAutoCollapseTimer();
+    }
 }
 
-// Add events for both mouse and touch to the placement area
 function addAreaEventListeners(area) {
     // Click event for mouse
     area.addEventListener('click', function(e) {
@@ -1034,8 +1148,8 @@ function createGameEggs() {
         egg.style.left = leftPos;
         egg.style.top = topPos;
         
-        // Add the bunny emoji content 
-        egg.textContent = '🐰';
+        // Remove the bunny emoji text content - it's added by CSS ::before
+        egg.textContent = '';
         egg.setAttribute('aria-label', `Easter egg ${index + 1}`);
         
         // Hide all eggs initially
@@ -1778,8 +1892,9 @@ function updateBackgroundImage(backgroundImage) {
     
     // Use CSS background-image instead of img element for better event handling
     container.style.backgroundImage = `url('${backgroundImage}')`;
-    container.style.backgroundSize = 'contain'; // Use 'contain' to ensure full height is visible
+    container.style.backgroundSize = 'cover'; // Use 'cover' to fill container
     container.style.backgroundPosition = 'center';
+    container.style.backgroundRepeat = 'no-repeat';
     
     // Ensure container styling is consistent
     container.style.position = 'relative';
@@ -1855,6 +1970,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
+// ------ Pawprint Functions ------
+
 // Create a pawprint trail between found eggs
 function createPawprintTrail(fromEgg, toEgg) {
   // Extract positions from the egg elements (removing % symbol and converting to numbers)
@@ -1864,7 +1981,7 @@ function createPawprintTrail(fromEgg, toEgg) {
   const toTop = parseFloat(toEgg.style.top);
   
   // Log the positions to help with debugging
-  console.log(`Creating pawprint trail from (${fromLeft}%, ${fromTop}%) to (${toLeft}%, ${toTop}%)`);
+  console.log('Creating pawprint trail from (' + fromLeft + '%, ' + fromTop + '%) to (' + toLeft + '%, ' + toTop + '%)');
   
   // Calculate distance between eggs
   const distance = Math.sqrt(Math.pow(toLeft - fromLeft, 2) + Math.pow(toTop - fromTop, 2));
@@ -1887,17 +2004,16 @@ function createPawprintTrail(fromEgg, toEgg) {
   if (!document.getElementById('pawprint-animation-style')) {
     const styleTag = document.createElement('style');
     styleTag.id = 'pawprint-animation-style';
-    styleTag.textContent = `
-      @keyframes fadeInPawprint {
-        0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5) rotate(var(--rotation)); }
-        50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) rotate(var(--rotation)) translateY(-10px); }
-        100% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(var(--rotation)) translateY(0); }
-      }
-      @keyframes bouncePawprint {
-        0%, 100% { transform: translate(-50%, -50%) scale(1) rotate(var(--rotation)); }
-        50% { transform: translate(-50%, -50%) scale(1.1) rotate(var(--rotation)) translateY(-5px); }
-      }
-    `;
+    styleTag.textContent = 
+      '@keyframes fadeInPawprint {' +
+      '  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5) rotate(var(--rotation)); }' +
+      '  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) rotate(var(--rotation)) translateY(-10px); }' +
+      '  100% { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(var(--rotation)) translateY(0); }' +
+      '}' +
+      '@keyframes bouncePawprint {' +
+      '  0%, 100% { transform: translate(-50%, -50%) scale(1) rotate(var(--rotation)); }' +
+      '  50% { transform: translate(-50%, -50%) scale(1.1) rotate(var(--rotation)) translateY(-5px); }' +
+      '}';
     document.head.appendChild(styleTag);
   }
   
@@ -1907,8 +2023,8 @@ function createPawprintTrail(fromEgg, toEgg) {
     
     // Calculate position with slight randomization for natural look
     // Make sure jitter is small enough not to disrupt the path
-    const jitterX = Math.random() * 2 - 1; // +/- 1%
-    const jitterY = Math.random() * 2 - 1; // +/- 1%
+    const jitterX = Math.random() * 2 - 1;
+    const jitterY = Math.random() * 2 - 1;
     
     // Calculate pawprint position as percentage of the container
     const pawLeft = fromLeft + (toLeft - fromLeft) * ratio + jitterX;
@@ -1919,12 +2035,12 @@ function createPawprintTrail(fromEgg, toEgg) {
     pawprint.className = 'pawprint';
     pawprint.textContent = '🐾';
     pawprint.style.position = 'absolute';
-    pawprint.style.left = `${pawLeft}%`;
-    pawprint.style.top = `${pawTop}%`;
-    pawprint.style.fontSize = '24px'; // Increased from 16px to 24px for better visibility
+    pawprint.style.left = pawLeft + '%';
+    pawprint.style.top = pawTop + '%';
+    pawprint.style.fontSize = '24px';
     pawprint.style.transform = 'translate(-50%, -50%)';
-    pawprint.style.color = 'rgba(101, 67, 33, 0.9)'; // Darker brown color for better contrast
-    pawprint.style.filter = 'drop-shadow(0 0 4px rgba(255, 255, 255, 0.9))'; // Stronger drop shadow
+    pawprint.style.color = 'rgba(101, 67, 33, 0.9)';
+    pawprint.style.filter = 'drop-shadow(0 0 4px rgba(255, 255, 255, 0.9))';
     pawprint.style.pointerEvents = 'none';
     
     // Alternate between slight rotations for a more natural path
@@ -1933,12 +2049,12 @@ function createPawprintTrail(fromEgg, toEgg) {
     
     // Fade in animation with delay and bounce
     pawprint.style.opacity = '0';
-    pawprint.style.animation = `fadeInPawprint 0.8s forwards ${i * 0.1}s`;
+    pawprint.style.animation = 'fadeInPawprint 0.8s forwards ' + (i * 0.1) + 's';
     
     // Add continuous bounce animation after the initial appearance
-    setTimeout(() => {
+    setTimeout(function() {
       if (pawprint.parentNode) { // Check if still in the DOM
-        pawprint.style.animation = `bouncePawprint 3s infinite ${Math.random() * 3}s`;
+        pawprint.style.animation = 'bouncePawprint 3s infinite ' + (Math.random() * 3) + 's';
         pawprint.style.opacity = '1'; // Ensure it's fully visible
       }
     }, (i * 100) + 800); // Wait for initial animation to complete
@@ -1950,10 +2066,12 @@ function createPawprintTrail(fromEgg, toEgg) {
   // Add trail to game container
   gameContainer.appendChild(trail);
   
-  console.log(`Created trail with ${numPawprints - 1} pawprints`);
+  console.log('Created trail with ' + (numPawprints - 1) + ' pawprints');
   
   return trail;
 }
+
+// ------ Hint Functions ------
 
 // Add hint button functionality
 document.getElementById('hint-button').addEventListener('click', showHint);
@@ -1991,9 +2109,28 @@ function showHint() {
       egg.style.opacity = '1';
       egg.classList.add('new-egg'); // Add highlight effect
       
+      // Make sure transform properly handles positioning
+      // This ensures the egg doesn't create a "duplicate" visual appearance
+      if (egg.style.transform && egg.style.transform.includes('translate')) {
+        // Keep existing transform if it has translate values
+        egg.style.transform = egg.style.transform.replace('scale(1)', 'scale(1.05)');
+      } else {
+        // Always ensure transform includes the translate adjustment to avoid duplication
+        const left = parseFloat(egg.style.left);
+        const top = parseFloat(egg.style.top);
+        if (!isNaN(left) && !isNaN(top)) {
+          // Only adjust if left and top are numeric values
+          egg.style.transform = 'translate(-50%, -50%) scale(1.05)';
+        }
+      }
+      
       // Remove highlight effect after 3 seconds
       setTimeout(() => {
         egg.classList.remove('new-egg');
+        // Keep the egg visible but return to normal scale
+        if (egg.style.transform) {
+          egg.style.transform = egg.style.transform.replace('scale(1.05)', 'scale(1)');
+        }
       }, 3000);
     }
   }
@@ -2015,510 +2152,290 @@ function resetHintButton() {
   hintUsed = false;
 }
 
-// Create a special celebrating bunny that appears near a found egg
-function createCelebratingBunny(leftPos, topPos) {
-  const bunny = document.createElement('div');
-  bunny.className = 'background-bunny';
-  bunny.textContent = '🐰';
+/**
+ * Toggle the setup controls panel between collapsed and expanded states
+ */
+function toggleSetupControls() {
+  const setupControls = document.getElementById('setup-controls');
+  const toggleBtn = document.getElementById('setup-controls-toggle-btn');
   
-  // Parse position values to numbers
-  const left = parseFloat(leftPos);
-  const top = parseFloat(topPos);
+  if (!setupControls || !toggleBtn) return;
   
-  // Set bunny position near the egg location
-  // Add a small offset so it's not directly on top of the egg
-  const offsetX = Math.random() * 10 - 5; // Random offset between -5 and 5
-  const offsetY = Math.random() * 10 - 5;
+  // Toggle collapsed state
+  setupControlsCollapsed = !setupControlsCollapsed;
   
-  bunny.style.position = 'absolute';
-  bunny.style.left = `${left + offsetX}%`;
-  bunny.style.top = `${top + offsetY}%`;
-  bunny.style.fontSize = '32px';
-  bunny.style.zIndex = '1500'; // Above eggs
-  bunny.style.filter = 'drop-shadow(0 0 3px rgba(255, 255, 255, 0.8))';
-  
-  // Create the CSS animation if it doesn't exist
-  if (!document.querySelector('#celebration-bunny-style')) {
-    const style = document.createElement('style');
-    style.id = 'celebration-bunny-style';
-    style.innerHTML = `
-      @keyframes bunnyDance {
-        0%, 100% { transform: translateY(0) rotate(0deg); }
-        20% { transform: translateY(-15px) rotate(-5deg); }
-        40% { transform: translateY(0) rotate(5deg); }
-        60% { transform: translateY(-10px) rotate(-5deg); }
-        80% { transform: translateY(0) rotate(5deg); }
-      }
-    `;
-    document.head.appendChild(style);
+  // Update panel class and ARIA attributes
+  if (setupControlsCollapsed) {
+    setupControls.classList.add('collapsed');
+    toggleBtn.setAttribute('aria-expanded', 'false');
+    toggleBtn.innerHTML = '▼'; // Down arrow symbol - consistent with hunt UI
+  } else {
+    setupControls.classList.remove('collapsed');
+    toggleBtn.setAttribute('aria-expanded', 'true');
+    toggleBtn.innerHTML = '▲'; // Up arrow symbol - consistent with hunt UI
   }
   
-  // Apply dancing animation
-  bunny.style.animation = 'bunnyDance 1s infinite';
+  // Reset auto-collapse timer
+  startSetupAutoCollapseTimer();
   
-  // Add to the game container
-  gameContainer.appendChild(bunny);
-  
-  // Remove the bunny after a short celebration
-  setTimeout(() => {
-    if (bunny.parentNode) {
-      // Fade out animation
-      bunny.style.transition = 'opacity 0.5s, transform 0.5s';
-      bunny.style.opacity = '0';
-      bunny.style.transform = 'translateY(-20px)';
-      
-      // Remove from DOM after fade out
-      setTimeout(() => {
-        if (bunny.parentNode) {
-          bunny.remove();
-        }
-      }, 500);
-    }
-  }, Math.random() * 2000 + 2000); // Random duration between 2-4 seconds
+  console.log('Setup controls panel ' + (setupControlsCollapsed ? 'collapsed' : 'expanded'));
 }
 
-// ------ Setup Loading Function ------
-
-// Start setup with loading animation
-function startSetupWithLoading() {
-    // Show loading screen
-    startScreen.classList.add('hidden');
-    const setupLoadingScreen = document.getElementById('setup-loading-screen');
-    setupLoadingScreen.classList.remove('hidden');
-    
-    // Simulate loading process
-    let progress = 0;
-    const loadingBar = document.getElementById('setup-loading-bar');
-    const loadingInterval = setInterval(() => {
-        progress += 10; // Faster progress for setup
-        loadingBar.style.width = `${progress}%`;
-        
-        if (progress >= 100) {
-            clearInterval(loadingInterval);
-            
-            // Hide loading screen and show setup screen
-            setTimeout(() => {
-                setupLoadingScreen.classList.add('hidden');
-                showSetupScreen();
-            }, 300);
-        }
-    }, 80); // Slightly faster update for setup
-}
-
-// Initialize collapsible "More Settings" section
-function initMoreSettings() {
-  const moreSettingsToggle = document.querySelector('.more-settings-toggle');
-  const moreSettingsContent = document.querySelector('.more-settings-content');
-  
-  if (moreSettingsToggle && moreSettingsContent) {
-    // Set up click handler for the toggle button
-    moreSettingsToggle.addEventListener('click', function() {
-      // Toggle the expanded state
-      const isExpanded = moreSettingsToggle.getAttribute('aria-expanded') === 'true';
-      moreSettingsToggle.setAttribute('aria-expanded', !isExpanded);
-      
-      // Toggle visibility of content
-      if (isExpanded) {
-        moreSettingsContent.classList.add('hidden');
-      } else {
-        moreSettingsContent.classList.remove('hidden');
-      }
-    });
-    
-    // Connect setup audio controls to the main audio controls
-    const setupVolumeSlider = document.getElementById('volume-slider-setup');
-    const mainVolumeSlider = document.getElementById('volume-slider');
-    const playPauseSetupBtn = document.getElementById('play-pause-btn-setup');
-    const nextTrackSetupBtn = document.getElementById('next-track-btn-setup');
-    const soundToggleSetupBtn = document.getElementById('sound-toggle-setup');
-    
-    if (setupVolumeSlider && mainVolumeSlider) {
-      // Sync initial value
-      setupVolumeSlider.value = mainVolumeSlider.value;
-      
-      // Setup volume slider changes update main volume
-      setupVolumeSlider.addEventListener('input', function(e) {
-        const volume = e.target.value / 100;
-        // Update the main volume slider
-        mainVolumeSlider.value = e.target.value;
-        // Update actual volume
-        const backgroundMusic = document.getElementById('background-music');
-        if (backgroundMusic) {
-          backgroundMusic.volume = volume;
-        }
-        // Store the volume preference
-        localStorage.setItem('eggHuntVolume', volume);
-      });
-    }
-    
-    // Play/Pause button in setup mirrors main play/pause
-    if (playPauseSetupBtn) {
-      playPauseSetupBtn.addEventListener('click', function() {
-        const backgroundMusic = document.getElementById('background-music');
-        if (backgroundMusic) {
-          if (backgroundMusic.paused) {
-            backgroundMusic.play().catch(e => {
-              console.log('Failed to play background music, likely missing file');
-            });
-            playPauseSetupBtn.textContent = '⏸️';
-            // Sync with main play button
-            const mainPlayBtn = document.getElementById('play-pause-btn');
-            if (mainPlayBtn) mainPlayBtn.textContent = '⏸️';
-          } else {
-            backgroundMusic.pause();
-            playPauseSetupBtn.textContent = '▶️';
-            // Sync with main play button
-            const mainPlayBtn = document.getElementById('play-pause-btn');
-            if (mainPlayBtn) mainPlayBtn.textContent = '▶️';
-          }
-        }
-      });
-    }
-    
-    // Next track button in setup mirrors main next track
-    if (nextTrackSetupBtn) {
-      nextTrackSetupBtn.addEventListener('click', function() {
-        SoundManager.nextTrack();
-      });
-    }
-    
-    // Sound toggle in setup mirrors main sound toggle
-    if (soundToggleSetupBtn) {
-      // Set initial state
-      soundToggleSetupBtn.textContent = soundEnabled ? '🔊' : '🔇';
-      
-      // Add click handler
-      soundToggleSetupBtn.addEventListener('click', function() {
-        // Toggle sound enabled state
-        soundEnabled = !soundEnabled;
-        // Update button text
-        soundToggleSetupBtn.textContent = soundEnabled ? '🔊' : '🔇';
-        // Also update the main sound toggle button
-        const soundToggle = document.getElementById('sound-toggle');
-        if (soundToggle) {
-          soundToggle.innerHTML = soundEnabled ? '🔊' : '🔇';
-          soundToggle.title = soundEnabled ? 'Mute Sounds' : 'Enable Sounds';
-        }
-      });
-    }
-    
-    // On mobile, hide the floating audio controls and only use the setup panel
-    if (touchEnabled) {
-      const audioControls = document.getElementById('audio-controls');
-      if (audioControls) {
-        audioControls.classList.add('hidden');
-      }
-    }
+/**
+ * Start or restart the auto-collapse timer for the setup controls panel
+ * Panel will auto-collapse after 8 seconds of inactivity
+ */
+function startSetupAutoCollapseTimer() {
+  // Clear any existing timer
+  if (setupAutoCollapseTimerId) {
+    clearTimeout(setupAutoCollapseTimerId);
   }
+  
+  // Set new timer to collapse after 8 seconds
+  setupAutoCollapseTimerId = setTimeout(() => {
+    if (!setupControlsCollapsed) {
+      // Only collapse if currently expanded
+      toggleSetupControls();
+    }
+  }, 8000); // 8 seconds
 }
 
-// Settings Modal Functions
+/**
+ * Initialize the settings modal
+ * Sets up event listeners and functionality for game settings
+ */
 function initSettingsModal() {
-    // Get DOM elements
-    const settingsModal = document.getElementById('settings-modal');
-    const settingsBtns = [
-        document.getElementById('settings-btn-setup'),
-        document.getElementById('settings-btn-game')
-    ];
-    const closeBtn = document.getElementById('settings-close-btn');
-    const volumeSlider = document.getElementById('settings-volume');
-    const playPauseBtn = document.getElementById('settings-play-pause');
-    const nextTrackBtn = document.getElementById('settings-next-track');
-    const soundToggleBtn = document.getElementById('settings-sound-toggle');
-    
-    // Set initial values based on current settings
-    if (volumeSlider) {
-        const backgroundMusic = document.getElementById('background-music');
-        if (backgroundMusic) {
-            volumeSlider.value = backgroundMusic.volume * 100;
-        } else {
-            // Default value if element doesn't exist yet
-            const savedVolume = localStorage.getItem('eggHuntVolume');
-            if (savedVolume !== null) {
-                volumeSlider.value = parseFloat(savedVolume) * 100;
-            }
-        }
+  const settingsModal = document.getElementById('settings-modal');
+  const closeBtn = document.getElementById('settings-close-btn');
+  const volumeSlider = document.getElementById('settings-volume');
+  const playPauseBtn = document.getElementById('settings-play-pause');
+  const nextTrackBtn = document.getElementById('settings-next-track');
+  const soundToggleBtn = document.getElementById('settings-sound-toggle');
+  
+  // Add event listener for close button
+  closeBtn.addEventListener('click', function() {
+    settingsModal.classList.add('hidden');
+  });
+  
+  // Add event listener for clicking outside the modal
+  settingsModal.addEventListener('click', function(e) {
+    if (e.target === settingsModal) {
+      settingsModal.classList.add('hidden');
     }
+  });
+  
+  // Initialize volume slider
+  const savedVolume = localStorage.getItem('eggHuntVolume');
+  if (savedVolume !== null) {
+    volumeSlider.value = parseFloat(savedVolume) * 100;
+  }
+  
+  // Update volume when slider moves
+  volumeSlider.addEventListener('input', function() {
+    const volumeLevel = parseFloat(volumeSlider.value) / 100;
     
-    // Set initial button states
-    if (playPauseBtn) {
-        const backgroundMusic = document.getElementById('background-music');
-        playPauseBtn.textContent = backgroundMusic && !backgroundMusic.paused ? '⏸️' : '▶️';
-    }
-    
-    if (soundToggleBtn) {
-        soundToggleBtn.textContent = soundEnabled ? '🔊' : '🔇';
-    }
-    
-    // Add event listeners to settings buttons
-    settingsBtns.forEach(btn => {
-        if (btn) btn.addEventListener('click', openSettingsModal);
-    });
-    
-    // Close button event
-    if (closeBtn) {
-        closeBtn.addEventListener('click', closeSettingsModal);
-    }
-    
-    // Close on click outside modal content
-    if (settingsModal) {
-        settingsModal.addEventListener('click', function(e) {
-            if (e.target === settingsModal) {
-                closeSettingsModal();
-            }
-        });
-    }
-    
-    // Volume slider event
-    if (volumeSlider) {
-        volumeSlider.addEventListener('input', function(e) {
-            const volume = e.target.value / 100;
-            updateVolume(volume);
-        });
-    }
-    
-    // Play/Pause button event
-    if (playPauseBtn) {
-        playPauseBtn.addEventListener('click', function() {
-            togglePlayPause();
-            playPauseBtn.textContent = isPlaying() ? '⏸️' : '▶️';
-        });
-    }
-    
-    // Next track button event
-    if (nextTrackBtn) {
-        nextTrackBtn.addEventListener('click', function() {
-            SoundManager.nextTrack();
-        });
-    }
-    
-    // Sound toggle button event
-    if (soundToggleBtn) {
-        soundToggleBtn.addEventListener('click', function() {
-            soundEnabled = !soundEnabled;
-            soundToggleBtn.textContent = soundEnabled ? '🔊' : '🔇';
-            
-            // Update all other sound toggle buttons for consistency
-            const otherSoundToggles = document.querySelectorAll('[id^="sound-toggle"]');
-            otherSoundToggles.forEach(btn => {
-                if (btn !== soundToggleBtn) {
-                    btn.textContent = soundEnabled ? '🔊' : '🔇';
-                }
-            });
-        });
-    }
-}
-
-// Open the settings modal
-function openSettingsModal() {
-    const settingsModal = document.getElementById('settings-modal');
-    
-    // Before opening, update values to match current state
-    updateSettingsModalValues();
-    
-    // Show the modal
-    if (settingsModal) {
-        settingsModal.classList.remove('hidden');
-    }
-}
-
-// Close the settings modal
-function closeSettingsModal() {
-    const settingsModal = document.getElementById('settings-modal');
-    if (settingsModal) {
-        // Settings are applied immediately so no need for explicit save
-        settingsModal.classList.add('hidden');
-    }
-}
-
-// Update all values in the settings modal
-function updateSettingsModalValues() {
-    const volumeSlider = document.getElementById('settings-volume');
-    const playPauseBtn = document.getElementById('settings-play-pause');
-    const soundToggleBtn = document.getElementById('settings-sound-toggle');
-    
-    // Update volume slider
-    if (volumeSlider) {
-        const backgroundMusic = document.getElementById('background-music');
-        if (backgroundMusic) {
-            volumeSlider.value = backgroundMusic.volume * 100;
-        }
-    }
-    
-    // Update play/pause button
-    if (playPauseBtn) {
-        playPauseBtn.textContent = isPlaying() ? '⏸️' : '▶️';
-    }
-    
-    // Update sound toggle button
-    if (soundToggleBtn) {
-        soundToggleBtn.textContent = soundEnabled ? '🔊' : '🔇';
-    }
-}
-
-// Save settings
-function saveSettings() {
-    // Currently all settings are applied immediately
-    // This function could be expanded for future settings
-    closeSettingsModal();
-}
-
-// Helper for play/pause toggle
-function togglePlayPause() {
-    const backgroundMusic = document.getElementById('background-music');
-    if (!backgroundMusic) return;
-    
-    if (backgroundMusic.paused) {
-        backgroundMusic.play().catch(e => {
-            console.log('Failed to play background music, likely missing file');
-        });
-    } else {
-        backgroundMusic.pause();
-    }
-    
-    // Update all play/pause buttons for consistency
-    updateAllPlayPauseButtons();
-}
-
-// Check if music is playing
-function isPlaying() {
-    const backgroundMusic = document.getElementById('background-music');
-    return backgroundMusic && !backgroundMusic.paused;
-}
-
-// Update all play/pause buttons in the game
-function updateAllPlayPauseButtons() {
-    const isCurrentlyPlaying = isPlaying();
-    const playPauseButtons = document.querySelectorAll('[id$="play-pause"], [id$="play-pause-btn-setup"]');
-    
-    playPauseButtons.forEach(btn => {
-        btn.textContent = isCurrentlyPlaying ? '⏸️' : '▶️';
-    });
-}
-
-// Update volume across the game
-function updateVolume(volume) {
-    // Update the audio element
+    // Update background music volume if it exists
     const backgroundMusic = document.getElementById('background-music');
     if (backgroundMusic) {
-        backgroundMusic.volume = volume;
+      backgroundMusic.volume = volumeLevel;
+      
+      // Save setting to localStorage
+      localStorage.setItem('eggHuntVolume', volumeLevel.toString());
     }
+  });
+  
+  // Configure play/pause button
+  playPauseBtn.addEventListener('click', function() {
+    const backgroundMusic = document.getElementById('background-music');
+    if (backgroundMusic) {
+      if (backgroundMusic.paused) {
+        backgroundMusic.play()
+          .then(() => {
+            playPauseBtn.textContent = '⏸️';
+            playPauseBtn.title = 'Pause';
+          })
+          .catch(err => console.error('Failed to play music:', err));
+      } else {
+        backgroundMusic.pause();
+        playPauseBtn.textContent = '▶️';
+        playPauseBtn.title = 'Play';
+      }
+    }
+  });
+  
+  // Configure next track button
+  nextTrackBtn.addEventListener('click', function() {
+    SoundManager.nextTrack();
+  });
+  
+  // Configure sound effects toggle
+  soundToggleBtn.addEventListener('click', function() {
+    soundEnabled = !soundEnabled;
+    soundToggleBtn.textContent = soundEnabled ? '🔊' : '🔇';
+    soundToggleBtn.title = soundEnabled ? 'Mute Sound Effects' : 'Enable Sound Effects';
     
-    // Save volume preference
-    localStorage.setItem('eggHuntVolume', volume);
-    
-    // Update all volume sliders for consistency
-    const volumeSliders = document.querySelectorAll('[id$="volume"], [id$="volume-slider-setup"]');
-    volumeSliders.forEach(slider => {
-        slider.value = volume * 100;
-    });
+    // Save preference to localStorage
+    localStorage.setItem('eggHuntSoundEnabled', soundEnabled ? '1' : '0');
+  });
+  
+  // Initialize sound effects toggle button state
+  const savedSoundEnabled = localStorage.getItem('eggHuntSoundEnabled');
+  if (savedSoundEnabled !== null) {
+    soundEnabled = savedSoundEnabled === '1';
+    soundToggleBtn.textContent = soundEnabled ? '🔊' : '🔇';
+    soundToggleBtn.title = soundEnabled ? 'Mute Sound Effects' : 'Enable Sound Effects';
+  }
+  
+  // Update play/pause button to reflect current state
+  const backgroundMusic = document.getElementById('background-music');
+  if (backgroundMusic) {
+    playPauseBtn.textContent = backgroundMusic.paused ? '▶️' : '⏸️';
+  }
 }
 
 /**
- * Initialize the hunt UI panel toggle functionality
- * This sets up the toggle button to collapse/expand the panel
+ * Open the settings modal
+ * This is called when either of the settings buttons is clicked
  */
-function initHuntUIPanelToggle() {
-    const toggleBtn = document.getElementById('hunt-ui-toggle-btn');
-    
-    if (toggleBtn) {
-        // Set initial state (expanded)
-        huntUIPanelCollapsed = false;
-        toggleBtn.setAttribute('aria-expanded', 'true');
-        
-        // Add click event for toggling
-        toggleBtn.addEventListener('click', toggleHuntUIPanel);
-        
-        // Add touch event for better mobile experience
-        toggleBtn.addEventListener('touchend', function(e) {
-            e.preventDefault(); // Prevent default touch behavior
-            toggleHuntUIPanel();
-        }, { passive: false });
-        
-        // Start auto-collapse timer (collapse after 5 seconds)
-        startAutoCollapseTimer();
-    }
+function openSettingsModal() {
+  const settingsModal = document.getElementById('settings-modal');
+  settingsModal.classList.remove('hidden');
 }
 
 /**
- * Toggle the hunt UI panel between collapsed and expanded states
- * This function handles the visual transition and state tracking
+ * Initialize more settings section with collapsible functionality
  */
-function toggleHuntUIPanel() {
-    const panel = document.getElementById('hunt-ui-panel');
-    const toggleBtn = document.getElementById('hunt-ui-toggle-btn');
+function initMoreSettings() {
+  // Find the toggle button and content section
+  const toggleBtn = document.querySelector('.more-settings-toggle');
+  const contentSection = document.querySelector('.more-settings-content');
+  
+  // If elements don't exist, return early
+  if (!toggleBtn || !contentSection) return;
+  
+  // Set initial state - collapsed
+  let isExpanded = false;
+  toggleBtn.setAttribute('aria-expanded', 'false');
+  contentSection.style.maxHeight = '0';
+  contentSection.style.overflow = 'hidden';
+  
+  // Add click handler
+  toggleBtn.addEventListener('click', function() {
+    isExpanded = !isExpanded;
+    toggleBtn.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
     
-    if (!panel || !toggleBtn) return;
-    
-    // Toggle collapsed state
-    huntUIPanelCollapsed = !huntUIPanelCollapsed;
-    
-    // Update panel class and ARIA attributes
-    if (huntUIPanelCollapsed) {
-        panel.classList.add('collapsed');
-        toggleBtn.setAttribute('aria-expanded', 'false');
+    if (isExpanded) {
+      contentSection.style.maxHeight = contentSection.scrollHeight + 'px';
+      // After transition completes, set to "auto" to handle dynamic content
+      setTimeout(() => {
+        contentSection.style.maxHeight = 'none';
+      }, 300);
     } else {
-        panel.classList.remove('collapsed');
-        toggleBtn.setAttribute('aria-expanded', 'true');
+      // First set a specific height for the transition
+      contentSection.style.maxHeight = contentSection.scrollHeight + 'px';
+      // Force a reflow
+      contentSection.offsetHeight;
+      // Then animate to zero
+      contentSection.style.maxHeight = '0';
     }
-    
-    // Log state change for debugging
-    console.log(`Hunt UI Panel ${huntUIPanelCollapsed ? 'collapsed' : 'expanded'}`);
+  });
 }
 
 /**
- * Start or restart the auto-collapse timer for the hunt UI panel
- * Panel will auto-collapse after 5 seconds of inactivity
+ * Add a confetti canvas to the DOM for celebration animations
  */
-function startAutoCollapseTimer() {
-    // Clear any existing timers
-    if (autoCollapseTimerId) {
-        clearTimeout(autoCollapseTimerId);
-    }
-    
-    // Set new timer to collapse after 5 seconds
-    autoCollapseTimerId = setTimeout(() => {
-        if (!huntUIPanelCollapsed) {
-            // Only collapse if currently expanded
-            toggleHuntUIPanel();
-        }
-    }, 5000); // 5 seconds
+function addConfettiCanvas() {
+  // Check if canvas already exists
+  if (document.getElementById('confetti-canvas')) return;
+  
+  // Create canvas element
+  const canvas = document.createElement('canvas');
+  canvas.id = 'confetti-canvas';
+  canvas.style.position = 'fixed';
+  canvas.style.top = '0';
+  canvas.style.left = '0';
+  canvas.style.width = '100%';
+  canvas.style.height = '100%';
+  canvas.style.pointerEvents = 'none';
+  canvas.style.zIndex = '1500';
+  canvas.style.display = 'none';
+  
+  // Add to body
+  document.body.appendChild(canvas);
 }
 
 /**
- * Expand the hunt UI panel and optionally start the auto-collapse timer
- * @param {boolean} startTimer - Whether to start the auto-collapse timer (default: true)
+ * Update version display in the UI
+ * Shows the current version number in the bottom right corner
  */
-function expandHuntUIPanel(startTimer = true) {
-    const panel = document.getElementById('hunt-ui-panel');
-    const toggleBtn = document.getElementById('hunt-ui-toggle-btn');
+function updateVersionDisplay() {
+  // Check for existing version display
+  let versionDisplay = document.querySelector('.version-info');
+  
+  // If it doesn't exist, create one
+  if (!versionDisplay) {
+    versionDisplay = document.createElement('div');
+    versionDisplay.className = 'version-info';
+    document.body.appendChild(versionDisplay);
+  }
+  
+  // Update the version text
+  versionDisplay.textContent = 'v' + GAME_VERSION;
+}
+
+/**
+ * Add viewport meta tag for mobile devices
+ * Ensures proper scaling on mobile devices
+ */
+function ensureViewportMeta() {
+  // Check if viewport meta tag already exists
+  let viewport = document.querySelector('meta[name="viewport"]');
+  
+  // If not, create one
+  if (!viewport) {
+    viewport = document.createElement('meta');
+    viewport.name = 'viewport';
+    viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+    document.getElementsByTagName('head')[0].appendChild(viewport);
+  }
+}
+
+/**
+ * Initialize FastClick to eliminate 300ms delay on mobile devices
+ * This improves responsiveness on touch devices
+ */
+function initFastClick() {
+  // Check if the device supports touch events
+  if (touchEnabled) {
+    // Add touch-active class for visual feedback on touch
+    document.addEventListener('touchstart', function(e) {
+      if (e.target.tagName === 'BUTTON' || 
+          e.target.classList.contains('control-btn') ||
+          e.target.classList.contains('main-btn') ||
+          e.target.classList.contains('egg') ||
+          e.target.classList.contains('setup-egg')) {
+        e.target.classList.add('touch-active');
+      }
+    }, { passive: true });
+
+    // Remove touch-active class when touch ends
+    document.addEventListener('touchend', function(e) {
+      const activeElements = document.querySelectorAll('.touch-active');
+      activeElements.forEach(function(element) {
+        element.classList.remove('touch-active');
+      });
+    }, { passive: true });
+
+    // Also remove on touch cancel
+    document.addEventListener('touchcancel', function(e) {
+      const activeElements = document.querySelectorAll('.touch-active');
+      activeElements.forEach(function(element) {
+        element.classList.remove('touch-active');
+      });
+    }, { passive: true });
     
-    if (!panel || !toggleBtn) return;
-    
-    // Only do something if the panel is currently collapsed
-    if (huntUIPanelCollapsed) {
-        // Update collapsed state
-        huntUIPanelCollapsed = false;
-        
-        // Update panel class and ARIA attributes
-        panel.classList.remove('collapsed');
-        toggleBtn.setAttribute('aria-expanded', 'true');
-        
-        console.log('Hunt UI Panel auto-expanded');
-    }
-    
-    // Clear any existing auto-collapse timer
-    if (autoCollapseTimerId) {
-        clearTimeout(autoCollapseTimerId);
-    }
-    
-    // Start a new auto-collapse timer if requested
-    if (startTimer) {
-        autoCollapseTimerId = setTimeout(() => {
-            if (!huntUIPanelCollapsed) {
-                // Only collapse if currently expanded
-                toggleHuntUIPanel();
-            }
-        }, 5000); // 5 seconds
-    }
+    console.log('FastClick initialized for touch devices');
+  } else {
+    console.log('FastClick not needed (non-touch device)');
+  }
 }
