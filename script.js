@@ -734,6 +734,10 @@ function showSetupScreen() {
     startScreen.classList.add('hidden');
     setupScreen.classList.remove('hidden');
     
+    // Also show the setup controls since they're now outside the setup container
+    const setupControls = document.getElementById('setup-controls');
+    setupControls.classList.remove('hidden');
+    
     // Initialize egg placement area with the living room image
     const eggPlacementArea = document.getElementById('egg-placement-area');
     eggPlacementArea.innerHTML = '';
@@ -743,12 +747,12 @@ function showSetupScreen() {
     
     // Initialize setup controls toggle with expanded state
     setupControlsCollapsed = false;
-    const setupControls = document.getElementById('setup-controls');
     const toggleBtn = document.getElementById('setup-controls-toggle-btn');
     
     if (setupControls && toggleBtn) {
         setupControls.classList.remove('collapsed');
         toggleBtn.setAttribute('aria-expanded', 'true');
+        toggleBtn.innerHTML = '▲'; // Make sure the arrow is pointing up when expanded
         
         // Start auto-collapse timer (collapse after 8 seconds)
         startSetupAutoCollapseTimer();
@@ -2039,7 +2043,7 @@ function createPawprintTrail(fromEgg, toEgg) {
     pawprint.style.top = pawTop + '%';
     pawprint.style.fontSize = '24px';
     pawprint.style.transform = 'translate(-50%, -50%)';
-    pawprint.style.color = 'rgba(101, 67, 33, 0.9)';
+    pawprint.stylecolor = 'rgba(101, 67, 33, 0.9)';
     pawprint.style.filter = 'drop-shadow(0 0 4px rgba(255, 255, 255, 0.9))';
     pawprint.style.pointerEvents = 'none';
     

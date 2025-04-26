@@ -118,9 +118,9 @@ body, html {
     z-index: 1; /* Above easter background but below eggs */
 }
 
-/* Setup Controls - Hunt UI Panel Style */
+/* Setup Controls Panel - Now using fixed positioning like hunt-ui-panel */
 #setup-controls {
-    position: absolute;
+    position: fixed;
     right: 20px;
     top: 50%;
     transform: translateY(-50%);
@@ -144,8 +144,9 @@ body, html {
 
 /* Controls toggle buttons - shared styles */
 .setup-controls-toggle, .hunt-ui-toggle {
-    position: relative;
-    height: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
 }
 
@@ -165,24 +166,32 @@ body, html {
     transition: transform 0.3s ease, background-color 0.3s ease;
     padding: 0;
     line-height: 1;
-    z-index: 101;
 }
 
 /* Setup controls toggle positioning */
+.setup-controls-toggle {
+    z-index: 101;
+}
+
 .setup-controls-toggle #setup-controls-toggle-btn {
     position: absolute;
-    bottom: -18px;
+    top: -18px;
     left: 50%;
     transform: translateX(-50%);
+    z-index: 101;
 }
 
 /* Hunt UI toggle positioning */
+.hunt-ui-toggle {
+    z-index: 1601;
+}
+
 .hunt-ui-toggle #hunt-ui-toggle-btn {
     position: absolute;
-    bottom: -18px;
+    top: -18px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 1600;
+    z-index: 1601;
 }
 
 /* Toggle button hover effects */
@@ -193,10 +202,15 @@ body, html {
 }
 
 /* Rotate arrow when collapsed */
-#setup-controls.collapsed .toggle-arrow,
-#hunt-ui-panel.collapsed .toggle-arrow {
-    transform: rotate(180deg);
-    display: inline-block;
+#setup-controls.collapsed #setup-controls-toggle-btn,
+#hunt-ui-panel.collapsed #hunt-ui-toggle-btn {
+    transform: translateX(-50%) rotate(180deg);
+}
+
+/* Hover effect for rotated arrow */
+#setup-controls.collapsed #setup-controls-toggle-btn:hover,
+#hunt-ui-panel.collapsed #hunt-ui-toggle-btn:hover {
+    transform: translateX(-50%) rotate(180deg) scale(1.1);
 }
 
 /* Controls content container for animations */
