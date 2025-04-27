@@ -1,7 +1,9 @@
-/* Set up the background image and basic layout */
-/* Add Google Fonts import for "Comic Neue" as a replacement for Comic Sans MS */
+/* =================================================
+   Base Styles & Font Imports
+   ================================================= */
 @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap');
 
+/* Define local font fallbacks */
 @font-face {
     font-family: 'Comic Neue Local';
     src: url('https://fonts.gstatic.com/s/comicneue/v8/4UaHrEJDsxBrF37olUeD96rp57F2IwN-Pw.woff2') format('woff2');
@@ -22,7 +24,6 @@ body, html {
     height: 100%;
     margin: 0;
     padding: 0;
-    /* Use Comic Neue as main font with fallbacks */
     font-family: 'Comic Neue Local', 'Comic Neue', 'Comic Sans MS', cursive, sans-serif;
     overflow: hidden;
     touch-action: manipulation; /* Prevents double-tap zooming on touch devices */
@@ -47,7 +48,13 @@ body, html {
     100% { background-position: 0% 50%; }
 }
 
-/* Common styles for all screens */
+.hidden {
+    display: none !important;
+}
+
+/* =================================================
+   Screen Layout & Common Elements
+   ================================================= */
 .screen {
     position: absolute;
     top: 0;
@@ -59,10 +66,6 @@ body, html {
     justify-content: center;
     align-items: center;
     transition: opacity 0.5s ease;
-}
-
-.hidden {
-    display: none !important;
 }
 
 /* Start Screen */
@@ -103,7 +106,6 @@ body, html {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     background-color: #f9f9f9;
     overflow: hidden;
-    /* Using CSS background-image */
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
@@ -118,39 +120,294 @@ body, html {
     z-index: 1; /* Above easter background but below eggs */
 }
 
-/* Setup Controls Panel - Now using fixed positioning like hunt-ui-panel */
+/* Game container styles */
+#game-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 10;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
+
+/* Background image */
+.background-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    max-width: none;
+    max-height: 100%;
+    margin: 0 auto;
+}
+
+/* Version info */
+.version-info {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    font-size: 0.8em;
+    color: rgba(136, 85, 221, 0.7);
+    background-color: rgba(255, 255, 255, 0.4);
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-family: 'Comic Neue Local', 'Comic Neue', monospace;
+}
+
+/* =================================================
+   UI Panels (Setup & Hunt)
+   ================================================= */
+/* Common Panel Styles */
+.ui-panel {
+    position: fixed;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    border: 3px solid #ffcccc;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    z-index: 1500;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    transition: width 0.5s ease, height 0.5s ease, max-height 0.5s ease, max-width 0.5s ease, 
+                opacity 0.3s ease, top 0.5s ease, right 0.5s ease, left 0.5s ease, transform 0.5s ease;
+}
+
+/* Content containers within panels */
+.setup-controls-content, .hunt-ui-content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    transition: opacity 0.3s ease, padding 0.5s ease, max-height 0.5s ease;
+    position: relative;
+    padding: 10px;
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0; /* Prevent flex item from growing infinitely */
+}
+
+/* Panel headings */
+#setup-controls h2, #hunt-ui-panel h2 {
+    color: #ff66b3;
+    margin-top: 10px;
+}
+
+#setup-controls h3 {
+    color: #8855dd;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+/* Setup Controls Panel - Specific Styles */
 #setup-controls {
     position: fixed;
     right: 20px;
     top: 50%;
     transform: translateY(-50%);
-    width: 300px;
-    max-height: 80%;
-    padding: 20px;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 20px;
-    border: 3px solid #ffcccc;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-    overflow-y: auto;
-    z-index: 100;
-    transition: all 0.5s ease;
+    width: 350px;
+    max-height: 80vh;
+    z-index: 100; /* Keep setup controls below hunt panel */
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.4s ease-in-out;
+}
+
+/* Setup panel header space for settings button */
+.setup-controls-content h2 {
+    margin: 10px 50px 10px 0px;
+}
+
+/* Setup panel settings button position */
+#settings-btn-setup {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 120;
+}
+
+/* Setup controls toggle positioning */
+.setup-controls-toggle {
+    z-index: 101;
+    position: relative; /* Keep relative positioning */
+    height: 20px; /* Space for the button outside */
+    flex-shrink: 0; /* Prevent toggle container from shrinking */
+}
+
+.setup-controls-toggle #setup-controls-toggle-btn {
+    position: absolute;
+    bottom: -18px; /* Position relative to the toggle container */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 102; /* Ensure button is above parent */
+}
+
+/* Hunt UI Panel - Specific Styles */
+#hunt-ui-panel {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    z-index: 1500;
+    text-align: center;
+    opacity: 1;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.4s ease-in-out;
+}
+
+/* Hunt panel header */
+#hunt-ui-panel h2 {
+    margin: 0 0 10px 0;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+    font-size: 1.8em;
+}
+
+/* Hunt UI panel toggle button */
+#hunt-ui-toggle-btn {
+    position: absolute;
+    bottom: -18px; /* Position below hunt panel */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1601; /* Above parent panel */
+}
+
+/* Hunt UI counters */
+.hunt-ui-counters {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    color: #8855dd;
+    font-size: 1.1em;
+    border-bottom: 1px dashed #ffcccc;
+    padding-bottom: 10px;
+}
+
+.clue-counter-display, .hunt-score {
+    color: #8855dd;
+}
+
+.hunt-score {
+    font-weight: bold;
+}
+
+/* Hunt clue container */
+.hunt-clue-container {
+    position: relative;
+    background-color: #fff1f8;
+    border-radius: 12px;
+    padding: 10px;
+    border: 1px solid #ffcccc;
+    margin: 10px 0;
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+.hunt-clue-container p {
+    color: #8855dd;
+    margin: 0 0 10px 0;
+    font-size: 1em;
+}
+
+.hunt-clue-text {
+    color: #333;
+    font-size: 1.5em;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 8px;
+    min-height: 1.2em;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    white-space: normal;
+}
+
+.highlight-clue {
+    animation: highlight 1s ease;
+}
+
+@keyframes highlight {
+    0% { background-color: rgba(255, 255, 200, 0.9); }
+    100% { background-color: rgba(255, 255, 255, 0.9); }
+}
+
+/* =================================================
+   Panel Collapsed States 
+   ================================================= */
+/* Animation state for transitions */
+#setup-controls.collapsing {
+    overflow: visible;
+    transition: height 0.4s ease, width 0.4s ease;
+}
+
+#setup-controls.collapsing .setup-controls-content {
+    transition: opacity 0.25s ease;
 }
 
 /* Collapsed state for setup controls */
 #setup-controls.collapsed {
-    width: 250px;
-    right: 10px;
+    height: 375px;
+    width: 350px;
+    border: 3px solid #ffcccc;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    overflow: visible;
 }
 
-/* Controls toggle buttons - shared styles */
-.setup-controls-toggle, .hunt-ui-toggle {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
+#setup-controls.collapsed .setup-controls-content {
+    height: 100%;
 }
 
-/* Toggle button styling - shared for setup and hunt UI */
+#setup-controls.collapsed h2,
+#setup-controls.collapsed .instructions,
+#setup-controls.collapsed .background-section {
+    display: none;
+}
+
+/* Collapsed state for Hunt UI */
+#hunt-ui-panel.collapsed {
+    width: auto;
+    height: auto;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 15px;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    transition: all 0.4s ease-in-out;
+}
+
+#hunt-ui-panel.collapsed .hunt-ui-content {
+    padding: 0;
+}
+
+#hunt-ui-panel.collapsed h2,
+#hunt-ui-panel.collapsed .hunt-ui-counters,
+#hunt-ui-panel.collapsed #reset-btn,
+#hunt-ui-panel.collapsed .easter-decoration,
+#hunt-ui-panel.collapsed #settings-btn-game {
+    display: none;
+}
+
+#hunt-ui-panel.collapsed .hunt-clue-container {
+    margin: 0;
+    background-color: #fff1f8;
+    border-radius: 12px;
+    padding: 10px;
+    border: 2px solid #ffcccc;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    animation: appear 0.4s ease-out;
+}
+
+/* =================================================
+   Toggle Buttons & Other Controls
+   ================================================= */
+/* Toggle buttons */
 .toggle-btn, #setup-controls-toggle-btn, #hunt-ui-toggle-btn {
     width: 36px;
     height: 36px;
@@ -168,32 +425,6 @@ body, html {
     line-height: 1;
 }
 
-/* Setup controls toggle positioning */
-.setup-controls-toggle {
-    z-index: 101;
-}
-
-.setup-controls-toggle #setup-controls-toggle-btn {
-    position: absolute;
-    top: -18px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 101;
-}
-
-/* Hunt UI toggle positioning */
-.hunt-ui-toggle {
-    z-index: 1601;
-}
-
-.hunt-ui-toggle #hunt-ui-toggle-btn {
-    position: absolute;
-    top: -18px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1601;
-}
-
 /* Toggle button hover effects */
 .toggle-btn:hover, #setup-controls-toggle-btn:hover, #hunt-ui-toggle-btn:hover {
     background: #ff99cc;
@@ -201,147 +432,101 @@ body, html {
     transform: translateX(-50%) scale(1.1);
 }
 
-/* Rotate arrow when collapsed */
-#setup-controls.collapsed #setup-controls-toggle-btn,
-#hunt-ui-panel.collapsed #hunt-ui-toggle-btn {
-    transform: translateX(-50%) rotate(180deg);
+/* Hover effect for collapsed state toggles */
+#setup-controls.collapsed #setup-controls-toggle-btn:hover {
+    transform: translateX(-50%) scale(1.1);
 }
 
-/* Hover effect for rotated arrow */
-#setup-controls.collapsed #setup-controls-toggle-btn:hover,
 #hunt-ui-panel.collapsed #hunt-ui-toggle-btn:hover {
-    transform: translateX(-50%) rotate(180deg) scale(1.1);
+    transform: translateX(-50%) scale(1.1);
 }
 
-/* Controls content container for animations */
-.setup-controls-content, .hunt-ui-content {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    transition: max-height 0.5s ease, opacity 0.3s ease;
-    position: relative;
-}
-
-/* Setup controls header margin for settings button */
-.setup-controls-content h2 {
-    margin-right: 50px; /* Make space for settings button */
-}
-
-/* Position the settings button inside setup panel */
-#settings-btn-setup {
-    position: absolute;
-    top: 0px;
-    right: 0px;
-    z-index: 120;
-}
-
-/* Hide elements when controls are collapsed */
-#setup-controls.collapsed h2,
-#setup-controls.collapsed .instructions,
-#setup-controls.collapsed .background-section,
-#hunt-ui-panel.collapsed h2,
-#hunt-ui-panel.collapsed .hunt-ui-counters,
-#hunt-ui-panel.collapsed #reset-btn,
-#hunt-ui-panel.collapsed .easter-decoration {
-    display: none;
-}
-
-/* Adjust content padding when collapsed */
-#setup-controls.collapsed .setup-controls-content {
-    padding: 10px 5px;
-}
-
-#hunt-ui-panel.collapsed .hunt-ui-content {
-    padding: 15px 10px 10px;
-}
-
-/* Headings */
-#setup-controls h2, #hunt-ui-panel h2 {
-    color: #ff66b3;
-    margin-top: 10px;
-}
-
-#setup-controls h3 {
-    color: #8855dd;
-    margin-top: 20px;
-    margin-bottom: 10px;
-}
-
-/* Egg list container */
-#egg-list-container {
-    max-height: 200px;
-    overflow-y: auto;
-    margin-bottom: 0px;
-    border: 1px solid #ffcccc;
+/* Common button styles */
+.main-btn,
+.control-btn,
+#modal-save-btn,
+#modal-remove-btn,
+#modal-cancel-btn,
+#restart-btn,
+#reset-btn {
     border-radius: 8px;
-    padding: 10px;
-}
-
-#egg-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-#egg-list li {
-    padding: 8px 10px;
-    margin-bottom: 5px;
-    background: #f9e9f9;
-    border-radius: 4px;
     cursor: pointer;
-    transition: background 0.3s;
-}
-
-#egg-list li:hover {
-    background: #ffcce6;
-}
-
-#egg-list li.selected {
-    background: #ffcccc;
-    border: 1px solid #ff99cc;
-}
-
-/* Form and input styles */
-.form-group, #egg-editor {
-    margin-bottom: 15px;
-}
-
-.form-group label,
-#egg-editor label {
-    display: block;
-    margin-top: 10px;
-    margin-bottom: 5px;
-    color: #8855dd;
-    font-weight: bold;
-}
-
-.form-group input,
-.form-group textarea,
-#egg-editor input, 
-#egg-editor textarea,
-.control-input {
-    width: 100%;
-    padding: 8px 10px;
-    border: 1px solid #ffcccc;
-    border-radius: 5px;
+    transition: all 0.3s;
     font-family: inherit;
-    background-color: #fff;
+    border: 2px solid #ff99cc;
+    background: #ffcccc;
+    color: #cc6699;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    user-select: none;
+}
+
+/* Button hover states */
+.main-btn:hover,
+.control-btn:hover,
+#modal-save-btn:hover,
+#modal-remove-btn:hover,
+#modal-cancel-btn:hover,
+#restart-btn:hover,
+#reset-btn:hover {
+    background: #ff99cc;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Button active states */
+.main-btn:active,
+.control-btn:active,
+.hint-btn:active,
+.egg:active,
+.setup-egg:active {
+    transform: scale(0.95);
+}
+
+/* Main button specific styles */
+.main-btn {
+    padding: 10px 10px;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2em;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+/* Control button specific styles */
+.control-btn {
+    padding: 10px 15px;
     font-size: 1em;
 }
 
-/* Instructions in setup */
-.instructions {
-    background: rgba(255, 255, 255, 0.5);
-    border-radius: 10px;
-    padding: 10px 15px;
-    margin-bottom: 15px;
-    border-left: 4px solid #ff99cc;
+/* Button variations */
+#modal-save-btn {
+    background: #ccffcc;
+    border-color: #99cc99;
+    color: #669966;
 }
 
-.instructions p {
-    margin: 5px 0;
+#modal-save-btn:hover {
+    background: #99cc99;
+}
+
+#modal-remove-btn {
+    background: #ffcccc;
+    border-color: #cc9999;
+    color: #cc6666;
+}
+
+#modal-remove-btn:hover {
+    background: #cc9999;
+}
+
+/* Reset button in hunt UI panel */
+#hunt-ui-panel #reset-btn {
+    margin: 10px auto;
+    width: auto;
+    max-width: none;
+    padding: 8px 15px;
     font-size: 0.9em;
-    color: #8855dd;
 }
 
 /* Button group styling */
@@ -360,25 +545,65 @@ body, html {
     width: fit-content;
 }
 
-/* Clue counter */
-.clue-counter {
-    font-size: 0.8em;
-    color: #8855dd;
-    margin-top: 10px;
-    border-top: 1px dashed #ffcccc;
-    padding-top: 5px;
+/* Circular buttons (icon buttons) */
+.icon-button,
+.settings-btn,
+.hint-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.8);
+    border: 2px solid #ffcccc;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1001;
+    transition: all 0.3s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    line-height: 1;
+    padding: 0;
 }
 
-/* Game container styles */
-#game-container {
+/* Icon button hover effects */
+.icon-button:hover,
+.settings-btn:hover,
+.hint-btn:hover {
+    transform: scale(1.1);
+    background: #ffcccc;
+}
+
+/* Icon button positions */
+.icon-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}
+
+.settings-btn:hover {
+    transform: scale(1.1) rotate(15deg);
+}
+
+/* Hint button */
+.hint-btn {
     position: absolute;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    z-index: 10;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    top: 2px;
+    right: 2px;
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
 }
 
+.hint-btn.used {
+    background: #f9e9f9;
+    border-color: #dd99dd;
+    color: #8855dd;
+}
+
+/* =================================================
+   Eggs & Animations
+   ================================================= */
 /* Common styles for all eggs */
 .egg, .setup-egg {
     position: absolute;
@@ -443,6 +668,13 @@ body, html {
     z-index: 7;
 }
 
+/* Found egg states */
+.egg.found {
+    opacity: 1 !important;
+    pointer-events: none;
+    color: rgba(0, 0, 0, 1) !important;
+}
+
 /* Add checkmark to found eggs */
 .egg.found::after {
     content: '✅';
@@ -452,13 +684,6 @@ body, html {
     font-size: 16px;
     filter: drop-shadow(0px 0px 2px white);
     opacity: 1 !important;
-}
-
-/* Ensure found eggs are always visible */
-.egg.found {
-    opacity: 1 !important;
-    pointer-events: none;
-    color: rgba(0, 0, 0, 1) !important;
 }
 
 /* Ensure all elements within found eggs are visible */
@@ -482,7 +707,6 @@ body, html {
     filter: drop-shadow(0px 0px 5px #ff66b3) drop-shadow(0px 0px 10px rgba(255, 255, 255));
 }
 
-/* New egg highlight - pink gradient background */
 .new-egg::before {
     background: radial-gradient(circle, rgba(255,204,230,0.9) 0%, rgba(255,255,255) 100%);
     box-shadow: 0 0 8px rgba(255, 102, 179, 0.6);
@@ -497,240 +721,7 @@ body, html {
     box-shadow: 0 0 15px 8px rgba(255, 204, 102, 0.8);
 }
 
-/* Button styles - common properties */
-.main-btn,
-.control-btn,
-#modal-save-btn,
-#modal-remove-btn,
-#modal-cancel-btn,
-#restart-btn,
-#reset-btn {
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s;
-    font-family: inherit;
-    border: 2px solid #ff99cc;
-    background: #ffcccc;
-    color: #cc6699;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
-    user-select: none;
-}
-
-/* Button hover states */
-.main-btn:hover,
-.control-btn:hover,
-#modal-save-btn:hover,
-#modal-remove-btn:hover,
-#modal-cancel-btn:hover,
-#restart-btn:hover,
-#reset-btn:hover {
-    background: #ff99cc;
-    color: white;
-    transform: scale(1.05);
-}
-
-/* Button active states */
-.main-btn:active,
-.control-btn:active,
-.hint-btn:active,
-.egg:active,
-.setup-egg:active {
-    transform: scale(0.95);
-}
-
-/* Main button specific styles */
-.main-btn {
-    padding: 10px 10px;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2em;
-    border-radius: 10px;
-    margin-bottom: 20px;
-}
-
-/* Control button specific styles */
-.control-btn {
-    padding: 10px 15px;
-    font-size: 1em;
-}
-
-/* Special button variations */
-#modal-save-btn {
-    background: #ccffcc;
-    border-color: #99cc99;
-    color: #669966;
-}
-
-#modal-save-btn:hover {
-    background: #99cc99;
-}
-
-#modal-remove-btn {
-    background: #ffcccc;
-    border-color: #cc9999;
-    color: #cc6666;
-}
-
-#modal-remove-btn:hover {
-    background: #cc9999;
-}
-
-/* Reset button in hunt UI panel */
-#hunt-ui-panel #reset-btn {
-    margin: 10px auto;
-    width: auto;
-    max-width: none;
-    padding: 8px 15px;
-    font-size: 0.9em;
-}
-
-/* Circular buttons (icon buttons) - consolidated styles */
-.icon-button,
-.settings-btn,
-.hint-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.8);
-    border: 2px solid #ffcccc;
-    font-size: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 1001;
-    transition: all 0.3s;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    line-height: 1;
-    padding: 0;
-}
-
-/* Icon button hover effects */
-.icon-button:hover,
-.settings-btn:hover,
-.hint-btn:hover {
-    transform: scale(1.1);
-    background: #ffcccc;
-}
-
-/* Icon button positions */
-.icon-button {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-}
-
-.settings-btn {
-    position: fixed;
-    top: 15px;
-    right: 15px;
-    z-index: 120;
-}
-
-.settings-btn:hover {
-    transform: scale(1.1) rotate(15deg);
-}
-
-/* Hint button positioning */
-.hint-btn {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    width: 36px;
-    height: 36px;
-    font-size: 18px;
-}
-
-/* Hint button used state */
-.hint-btn.used {
-    background: #f9e9f9;
-    border-color: #dd99dd;
-    color: #8855dd;
-}
-
-/* Egg animation keyframes */
-@keyframes bobble {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-@keyframes wiggle {
-    0%, 100% { transform: rotate(-5deg); }
-    50% { transform: rotate(5deg); }
-}
-
-@keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    40% { transform: translateY(-8px); }
-    60% { transform: translateY(-8px); }
-}
-
-@keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-}
-
-@keyframes egg-glow {
-    from { filter: drop-shadow(0 0 8px rgba(255, 102, 179, 0.8)); }
-    to { filter: drop-shadow(0 0 15px rgba(255, 102, 179, 0.9)); }
-}
-
-@keyframes newEggPulse {
-    0% { transform: scale(1); filter: drop-shadow(0px 0px 5px #ff66b3) drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.8)); }
-    50% { transform: scale(1.2); filter: drop-shadow(0px 0px 10px #ff66b3) drop-shadow(0px 0px 15px rgba(255, 255, 255, 0.9)); }
-    100% { transform: scale(1); filter: drop-shadow(0px 0px 5px #ff66b3) drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.8)); }
-}
-
-@keyframes appear {
-    from { transform: scale(0.8); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-
-@keyframes highlight {
-    0% { background-color: rgba(255, 255, 200, 0.9); }
-    100% { background-color: rgba(255, 255, 255, 0.9); }
-}
-
-@keyframes modalAppear {
-    from { transform: scale(0.8); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-
-@keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-    100% { transform: translateY(0px); }
-}
-
-@keyframes hop-across {
-    0% { transform: translateX(-50px) translateY(0); }
-    20% { transform: translateX(calc(20vw - 50px)) translateY(-20px); }
-    40% { transform: translateX(calc(40vw - 50px)) translateY(0); }
-    60% { transform: translateX(calc(60vw - 50px)) translateY(-20px); }
-    80% { transform: translateX(calc(80vw - 50px)) translateY(0); }
-    100% { transform: translateX(calc(100vw + 50px)) translateY(-10px); }
-}
-
-@keyframes fadeInPawprint {
-    from { opacity: 0; transform: translate(-50%, -50%) scale(0.5) rotate(var(--rotation)); }
-    to { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(var(--rotation)); }
-}
-
-@keyframes celebrate {
-    0% { opacity: 0; transform: scale(0) rotate(0deg); }
-    25% { opacity: 1; transform: scale(1.2) rotate(20deg); }
-    50% { opacity: 1; transform: scale(0.9) rotate(-15deg); }
-    75% { opacity: 1; transform: scale(1.1) rotate(5deg); }
-    100% { opacity: 1; transform: scale(1) rotate(0deg); }
-}
-
-/* Apply different animations to eggs based on their class */
+/* Apply different animations to eggs */
 .egg.animation-bobble { animation: bobble 3s infinite ease-in-out; }
 .egg.animation-spin { animation: spin 8s infinite linear; }
 .egg.animation-wiggle { animation: wiggle 2s infinite ease-in-out; }
@@ -742,102 +733,142 @@ body, html {
 .egg:nth-child(3n) { animation-delay: 0.6s; }
 .egg:nth-child(3n+1) { animation-delay: 0.9s; }
 
-/* Dynamic background elements */
-.background-bunny {
-    position: absolute;
-    font-size: 32px;
-    z-index: 2;
-    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.7));
-    pointer-events: none;
+/* =================================================
+   Form & Input Styles
+   ================================================= */
+.form-group, #egg-editor {
+    margin-bottom: 15px;
 }
 
-/* Audio player styles */
-.audio-controls {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    background-color: rgba(255, 255, 255, 0.8);
-    border: 2px solid #ffcccc;
-    border-radius: 30px;
-    padding: 5px 10px;
-    display: flex;
-    align-items: center;
-    z-index: 1001;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+.form-group label,
+#egg-editor label {
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    color: #8855dd;
+    font-weight: bold;
 }
 
-.audio-controls button {
-    background: none;
-    border: none;
-    font-size: 24px;
+.form-group input,
+.form-group textarea,
+#egg-editor input, 
+#egg-editor textarea,
+.control-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ffcccc;
+    border-radius: 5px;
+    font-family: inherit;
+    background-color: #fff;
+    font-size: 1em;
+}
+
+/* Custom file input styling */
+.custom-file-input {
+    font-family: inherit;
+    background-color: #ffcccc;
+    border: 2px solid #ff99cc;
+    border-radius: 8px;
+    color: #cc6699;
     cursor: pointer;
-    margin: 0 5px;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    padding: 8px;
+    transition: all 0.3s;
 }
 
-.audio-controls button:hover {
-    transform: scale(1.1);
+/* Instructions in setup */
+.instructions {
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border-left: 4px solid #ff99cc;
 }
 
-.audio-controls .volume-slider {
-    width: 60px;
-    margin: 0 5px;
-}
-
-/* Legacy UI elements */
-#clue-display {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    padding: 15px 20px;
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    text-align: center;
-    border: 3px solid #ffcccc;
-    z-index: 100;
-    max-width: 300px;
-    animation: appear 0.5s ease-out;
-    transform-origin: top left;
-}
-
-#floating-ui {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 15px 20px;
-    background: rgba(255, 255, 255, 0.85);
-    border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    text-align: center;
-    animation: float 3s ease-in-out infinite;
-    border: 3px solid #ffcccc;
-    z-index: 100;
-}
-
-#floating-ui h2 {
-    margin-top: 0;
-    color: #ff66b3;
-    text-shadow: 1px 1px 2px rgba(255, 102, 179, 0.3);
-}
-
-.easter-decoration {
-    font-size: 24px;
-    margin: 10px 0;
-    letter-spacing: 5px;
-}
-
-#score {
-    margin: 10px 0;
-    font-size: 1.2em;
+.instructions p {
+    margin: 5px 0;
+    font-size: 0.9em;
     color: #8855dd;
 }
 
-/* Modal Dialog */
+.helper-text {
+    text-align: center;
+}
+
+/* Egg list container */
+#egg-list-container {
+    max-height: 250px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    border: 1px solid #ffcccc;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.5);
+    flex-shrink: 1;
+    flex-grow: 1;
+    min-height: 50px;
+}
+
+#egg-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Clue counter */
+.clue-counter {
+    font-size: 0.8em;
+    color: #8855dd;
+    margin-top: 10px;
+    border-top: 1px dashed #ffcccc;
+    padding-top: 5px;
+}
+
+/* Background section */
+.background-section {
+    background-color: #f9f9f9;
+    border-radius: 10px;
+}
+
+.background-section h3 {
+    color: #8855dd;
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-weight: normal;
+    font-size: 1.1em;
+}
+
+.background-section p {
+    color: #888;
+    font-size: 0.75em;
+    margin: 5px 0 10px;
+    font-style: italic;
+}
+
+.background-controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+/* Camera and file upload buttons */
+#camera-capture, #file-upload-btn {
+    padding: 5px 10px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    background-color: #f9f3f3;
+    border: 1px solid #e6c0c0;
+    border-radius: 4px;
+}
+
+#camera-capture:hover, #file-upload-btn:hover {
+    background-color: #ffcccc;
+}
+
+/* =================================================
+   Modal Dialogs
+   ================================================= */
+/* Modal base styles */
 .modal {
     position: fixed;
     top: 0;
@@ -869,15 +900,6 @@ body, html {
     text-align: center;
 }
 
-.helper-text {
-    font-size: 0.75em;
-    color: #888;
-    margin-top: 8px;
-    margin-bottom: 0;
-    font-style: italic;
-    text-align: center;
-}
-
 /* Congratulations modal specific styles */
 #congrats-modal .easter-decoration {
     font-size: 28px;
@@ -894,37 +916,6 @@ body, html {
 #restart-btn {
     margin: 20px auto;
     display: block;
-}
-
-/* Background selection */
-#background-select {
-    cursor: pointer;
-}
-
-/* Custom file input styling */
-.custom-file-input {
-    font-family: inherit;
-    background-color: #ffcccc;
-    border: 2px solid #ff99cc;
-    border-radius: 8px;
-    color: #cc6699;
-    cursor: pointer;
-    padding: 8px;
-    transition: all 0.3s;
-}
-
-/* Camera and file upload buttons */
-#camera-capture, #file-upload-btn {
-    padding: 5px 10px;
-    font-size: 1.2rem;
-    cursor: pointer;
-    background-color: #f9f3f3;
-    border: 1px solid #e6c0c0;
-    border-radius: 4px;
-}
-
-#camera-capture:hover, #file-upload-btn:hover {
-    background-color: #ffcccc;
 }
 
 /* Camera modal styles */
@@ -974,182 +965,6 @@ body, html {
 
 .camera-controls button:hover {
     background: #ffcccc;
-}
-
-/* Background image */
-.background-img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: 0;
-    max-width: none;
-    max-height: 100%;
-    margin: 0 auto;
-}
-
-/* Pawprint trail styling */
-.pawprint {
-    position: absolute;
-    font-size: 16px;
-    color: rgba(139, 69, 19, 0.8);
-    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.7));
-    z-index: 500;
-    pointer-events: none;
-}
-
-/* Loading spinner and progress bar */
-.loading-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.8);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-}
-
-.loading-spinner {
-    width: 60px;
-    height: 60px;
-    border: 8px solid #ffcccc;
-    border-radius: 50%;
-    border-top: 8px solid #ff66b3;
-    animation: spin 1s linear infinite;
-    margin-bottom: 20px;
-}
-
-.loading-progress {
-    width: 80%;
-    max-width: 300px;
-    height: 20px;
-    background-color: #f0f0f0;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.loading-bar {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(45deg, #ff66b3, #ffcccc);
-    border-radius: 10px;
-    transition: width 0.3s ease;
-}
-
-.loading-text {
-    margin-top: 10px;
-    color: #8855dd;
-    font-size: 1.1em;
-    text-align: center;
-}
-
-/* Touch active state for better mobile feedback */
-.touch-active {
-    transform: scale(0.95) !important;
-    opacity: 0.9 !important;
-    transition: transform 0.1s, opacity 0.1s !important;
-    background-color: rgba(255, 153, 204, 0.8) !important;
-}
-
-/* More Settings section styles */
-.more-settings {
-    margin: 20px 0;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.more-settings-toggle {
-    width: 100%;
-    text-align: left;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 15px;
-    background: #ffeecc;
-    border: 2px solid #ffcc99;
-    border-radius: 8px;
-    color: #cc6633;
-    cursor: pointer;
-    transition: all 0.3s;
-    font-weight: bold;
-}
-
-.more-settings-toggle:hover {
-    background: #ffcc99;
-}
-
-.more-settings-icon {
-    margin-right: 8px;
-}
-
-.toggle-icon {
-    transition: transform 0.3s;
-}
-
-.more-settings-toggle[aria-expanded="true"] .toggle-icon {
-    transform: rotate(180deg);
-}
-
-.more-settings-content {
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px solid #ffcccc;
-    border-top: none;
-    border-radius: 0 0 8px 8px;
-    padding: 15px;
-    transition: max-height 0.3s ease-out;
-}
-
-.settings-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.audio-settings {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.audio-buttons {
-    display: flex;
-    gap: 10px;
-    margin-top: 5px;
-}
-
-.sound-toggle-setting {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 5px;
-}
-
-/* Mini buttons for settings panel */
-.mini-btn {
-    padding: 8px 12px;
-    min-height: 36px;
-    min-width: 36px;
-    font-size: 0.9em;
-}
-
-/* Version number display */
-.version-info {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    font-size: 0.8em;
-    color: rgba(136, 85, 221, 0.7);
-    background-color: rgba(255, 255, 255, 0.4);
-    padding: 3px 8px;
-    border-radius: 10px;
-    font-family: 'Comic Neue Local', 'Comic Neue', monospace;
 }
 
 /* Settings Modal Styling */
@@ -1257,151 +1072,254 @@ body, html {
     gap: 10px;
 }
 
-#settings-modal .control-btn {
-    width: 40px;
-    height: 40px;
+/* =================================================
+   Loading & Decorative Elements
+   ================================================= */
+/* Easter decoration */
+.easter-decoration {
+    font-size: 24px;
+    margin: 10px 0;
+    letter-spacing: 5px;
+}
+
+/* Dynamic background elements */
+.background-bunny {
+    position: absolute;
+    font-size: 32px;
+    z-index: 2;
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.7));
+    pointer-events: none;
+}
+
+/* Pawprint trail styling */
+.pawprint {
+    position: absolute;
     font-size: 16px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    background-color: #ffe6f2;
-    border: 2px solid #ff99cc;
-    color: #ff66b3;
+    color: rgba(139, 69, 19, 0.8);
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.7));
+    z-index: 500;
+    pointer-events: none;
 }
 
-/* Background section */
-.background-section {
-    margin-bottom: 20px;
-    background-color: #f9f9f9;
-    border-radius: 10px;
-    padding: 12px 15px;
-}
-
-.background-section h3 {
-    color: #8855dd;
-    margin-top: 0;
-    margin-bottom: 5px;
-    font-weight: normal;
-    font-size: 1.1em;
-}
-
-.background-section p {
-    color: #666;
-    font-size: 0.9em;
-    margin: 5px 0 10px;
-    font-style: italic;
-}
-
-.background-controls {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin: 10px 0;
-}
-
-.background-controls .control-btn {
-    width: 50px;
-    height: 45px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5em;
-    background-color: #ffe6f2;
-    border: 2px solid #ff99cc;
-    border-radius: 8px;
-}
-
-/* New Unified Hunt UI Panel styles */
-#hunt-ui-panel {
+/* Loading spinner and progress bar */
+.loading-container {
     position: fixed;
-    left: 50%;
-    width: 90%;
-    max-width: 500px;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 20px;
-    border: 3px solid #ffcccc;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-    text-align: center;
-    z-index: 1500;
-    transition: all 0.5s ease;
-    top: 50%;
-    transform: translate(-50%, -50%);
-}
-
-/* Collapsed state positioning */
-#hunt-ui-panel.collapsed {
-    top: 20px;
-    transform: translateX(-50%) translateY(0);
-    max-width: 60%;
-    border-radius: 15px;
-}
-
-/* Content container for animations */
-.hunt-ui-content {
-    padding: 20px 25px;
-}
-
-/* Hunt UI panel header */
-#hunt-ui-panel h2 {
-    margin: 0 0 10px 0;
-    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
-    font-size: 1.8em;
-}
-
-/* Hunt UI counters */
-.hunt-ui-counters {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 5px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 8px solid #ffcccc;
+    border-radius: 50%;
+    border-top: 8px solid #ff66b3;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+.loading-progress {
+    width: 80%;
+    max-width: 300px;
+    height: 20px;
+    background-color: #f0f0f0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.loading-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(45deg, #ff66b3, #ffcccc);
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+
+.loading-text {
+    margin-top: 10px;
     color: #8855dd;
     font-size: 1.1em;
-    border-bottom: 1px dashed #ffcccc;
-    padding-bottom: 10px;
+    text-align: center;
 }
 
-.clue-counter-display {
-    color: #8855dd;
+/* Legacy UI elements */
+#clue-display {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    border: 3px solid #ffcccc;
+    z-index: 100;
+    max-width: 300px;
+    animation: appear 0.5s ease-out;
+    transform-origin: top left;
 }
 
-.hunt-score {
-    color: #8855dd;
-    font-weight: bold;
+#floating-ui {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.85);
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    animation: float 3s ease-in-out infinite;
+    border: 3px solid #ffcccc;
+    z-index: 100;
 }
 
-/* Hunt clue container */
-.hunt-clue-container {
-    position: relative;
-    background-color: #fff1f8;
-    border-radius: 12px;
-    padding: 10px;
-    border: 1px solid #ffcccc;
+#floating-ui h2 {
+    margin-top: 0;
+    color: #ff66b3;
+    text-shadow: 1px 1px 2px rgba(255, 102, 179, 0.3);
+}
+
+#score {
     margin: 10px 0;
-}
-
-.hunt-clue-container p {
+    font-size: 1.2em;
     color: #8855dd;
-    margin: 0 0 10px 0;
-    font-size: 1em;
 }
 
-.hunt-clue-text {
-    color: #333;
-    font-size: 1.5em;
-    padding: 8px;
-    background: rgba(255, 255, 255, 0.6);
-    border-radius: 8px;
-    min-height: 1.2em;
+/* Audio player styles */
+.audio-controls {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 2px solid #ffcccc;
+    border-radius: 30px;
+    padding: 5px 10px;
+    display: flex;
+    align-items: center;
+    z-index: 1001;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-/* Highlight clue when new clue appears */
-.highlight-clue {
-    animation: highlight 1s ease;
+.audio-controls button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    margin: 0 5px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-/* Responsive design */
+.audio-controls button:hover {
+    transform: scale(1.1);
+}
+
+.audio-controls .volume-slider {
+    width: 60px;
+    margin: 0 5px;
+}
+
+/* Touch active state for better mobile feedback */
+.touch-active {
+    transform: scale(0.95) !important;
+    opacity: 0.9 !important;
+    transition: transform 0.1s, opacity 0.1s !important;
+    background-color: rgba(255, 153, 204, 0.8) !important;
+}
+
+/* =================================================
+   Animations
+   ================================================= */
+@keyframes appear {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes modalAppear {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes bobble {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+@keyframes wiggle {
+    0%, 100% { transform: rotate(-5deg); }
+    50% { transform: rotate(5deg); }
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-8px); }
+    60% { transform: translateY(-8px); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+@keyframes egg-glow {
+    from { filter: drop-shadow(0 0 8px rgba(255, 102, 179, 0.8)); }
+    to { filter: drop-shadow(0 0 15px rgba(255, 102, 179, 0.9)); }
+}
+
+@keyframes newEggPulse {
+    0% { transform: scale(1); filter: drop-shadow(0px 0px 5px #ff66b3) drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.8)); }
+    50% { transform: scale(1.2); filter: drop-shadow(0px 0px 10px #ff66b3) drop-shadow(0px 0px 15px rgba(255, 255, 255, 0.9)); }
+    100% { transform: scale(1); filter: drop-shadow(0px 0px 5px #ff66b3) drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.8)); }
+}
+
+@keyframes hop-across {
+    0% { transform: translateX(-50px) translateY(0); }
+    20% { transform: translateX(calc(20vw - 50px)) translateY(-20px); }
+    40% { transform: translateX(calc(40vw - 50px)) translateY(0); }
+    60% { transform: translateX(calc(60vw - 50px)) translateY(-20px); }
+    80% { transform: translateX(calc(80vw - 50px)) translateY(0); }
+    100% { transform: translateX(calc(100vw + 50px)) translateY(-10px); }
+}
+
+@keyframes fadeInPawprint {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.5) rotate(var(--rotation)); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1) rotate(var(--rotation)); }
+}
+
+@keyframes celebrate {
+    0% { opacity: 0; transform: scale(0) rotate(0deg); }
+    25% { opacity: 1; transform: scale(1.2) rotate(20deg); }
+    50% { opacity: 1; transform: scale(0.9) rotate(-15deg); }
+    75% { opacity: 1; transform: scale(1.1) rotate(5deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+/* =================================================
+   Responsive Design
+   ================================================= */
 @media (max-width: 768px) {
     /* Setup and content layout */
     #setup-container {

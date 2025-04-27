@@ -54,6 +54,7 @@ function createSound(type) {
         break;
       case 'success':
         oscillator.type = 'sine';
+        // *** CORRECTED typo: setValueAtAtime -> setValueAtTime ***
         oscillator.frequency.setValueAtTime(580, audioContext.currentTime);
         oscillator.frequency.exponentialRampToValueAtTime(780, audioContext.currentTime + 0.1);
         gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
@@ -738,9 +739,15 @@ function showSetupScreen() {
     const setupControls = document.getElementById('setup-controls');
     setupControls.classList.remove('hidden');
     
-    // Initialize egg placement area with the living room image
+    // Initialize egg placement area
     const eggPlacementArea = document.getElementById('egg-placement-area');
-    eggPlacementArea.innerHTML = '';
+    eggPlacementArea.innerHTML = ''; // Clear previous elements
+    
+    // *** ADDED: Redraw existing eggs from eggData ***
+    eggData.forEach(eggInfo => {
+        createVisualEgg(eggInfo, eggPlacementArea);
+    });
+    // *** END ADDED ***
     
     // Setup area for both click and touch
     addAreaEventListeners(eggPlacementArea);
@@ -758,6 +765,10 @@ function showSetupScreen() {
         startSetupAutoCollapseTimer();
     }
 }
+
+// ... existing code ...
+
+// ... existing code ...
 
 function addAreaEventListeners(area) {
     // Click event for mouse
@@ -1067,6 +1078,8 @@ function startGame() {
                 
                 // Hide setup screen and show game screen
                 setupScreen.classList.add('hidden');
+                // *** ADDED: Hide setup controls panel ***
+                document.getElementById('setup-controls').classList.add('hidden'); 
                 gameContainer.classList.remove('hidden');
                 
                 // Show the new unified UI panel
@@ -1161,6 +1174,8 @@ function createGameEggs() {
         
         // Event listener for clicking eggs
         egg.addEventListener('click', function() {
+            // *** ADD console log for debugging ***
+            console.log('Egg clicked. Index:', egg.dataset.eggIndex, 'Current Index:', currentEggIndex);
             if (parseInt(egg.dataset.eggIndex) === currentEggIndex) {
                 eggFound(egg);
             }
@@ -1169,6 +1184,8 @@ function createGameEggs() {
         // Add touch event for better mobile experience
         egg.addEventListener('touchend', function(e) {
             e.preventDefault();
+            // *** ADD console log for debugging ***
+            console.log('Egg touched. Index:', egg.dataset.eggIndex, 'Current Index:', currentEggIndex);
             if (parseInt(egg.dataset.eggIndex) === currentEggIndex) {
                 eggFound(egg);
             }
@@ -1586,10 +1603,10 @@ function resetGame() {
     clueDisplayLegacy.classList.add('hidden');
     floatingUILegacy.classList.add('hidden');
     
-    // Show setup screen
-    setupScreen.classList.remove('hidden');
+    // *** MODIFIED: Call showSetupScreen to handle showing setup screen AND controls ***
+    showSetupScreen();
     
-    // Reset UI style
+    // Reset UI style for hunt panel (for next game start)
     huntUIPanel.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
     huntUIPanel.style.border = '3px solid #ffcccc';
     
@@ -2158,25 +2175,106 @@ function resetHintButton() {
 
 /**
  * Toggle the setup controls panel between collapsed and expanded states
+ * with smooth animation transitions
  */
 function toggleSetupControls() {
   const setupControls = document.getElementById('setup-controls');
   const toggleBtn = document.getElementById('setup-controls-toggle-btn');
+  const content = document.querySelector('.setup-controls-content');
   
   if (!setupControls || !toggleBtn) return;
   
   // Toggle collapsed state
   setupControlsCollapsed = !setupControlsCollapsed;
   
-  // Update panel class and ARIA attributes
+  // Update ARIA attributes
+  toggleBtn.setAttribute('aria-expanded', !setupControlsCollapsed);
+  toggleBtn.innerHTML = setupControlsCollapsed ? '▼' : '▲';
+
+  
   if (setupControlsCollapsed) {
-    setupControls.classList.add('collapsed');
-    toggleBtn.setAttribute('aria-expanded', 'false');
-    toggleBtn.innerHTML = '▼'; // Down arrow symbol - consistent with hunt UI
+    // COLLAPSING
+    // Calculate starting height for smooth transition
+    const startHeight = setupControls.offsetHeight;
+    setupControls.style.height = startHeight + 'px';
+    
+    // Force reflow to ensure height is applied before transition
+    setupControls.offsetHeight;
+    
+    // Apply collapsing class to begin transition
+    setupControls.classList.add('collapsing');
+    
+    // Begin animation for content first
+    content.style.opacity = '0';
+    
+    // After content fades out, animate the container height
+    setTimeout(() => {
+      setupControls.classList.add('collapsed');
+      setupControls.style.height = ''; // Remove explicit height to use CSS value
+      
+      // Hide certain elements explicitly after animation
+      const elementsToHide = setupControls.querySelectorAll('h2, .instructions, .background-section');
+      elementsToHide.forEach(el => {
+        el.style.display = 'none';
+      });
+      
+      // Remove the collapsing class after animation completes
+      setTimeout(() => {
+        setupControls.classList.remove('collapsing');
+        // Now set to 1 to trigger the CSS transition
+        content.style.opacity = '1'; 
+      }, 300);
+    }, 250);
   } else {
+    // EXPANDING
+    // Set content opacity to 0 immediately to prevent it from showing
+    content.style.opacity = '0';
+    
+    // First, prepare elements but keep content hidden
+    const elementsToShow = setupControls.querySelectorAll('h2, .instructions, .background-section');
+    elementsToShow.forEach(el => {
+      el.style.display = '';
+    });
+    
+    // Remove collapsed class
     setupControls.classList.remove('collapsed');
-    toggleBtn.setAttribute('aria-expanded', 'true');
-    toggleBtn.innerHTML = '▲'; // Up arrow symbol - consistent with hunt UI
+    
+    // Force reflow to update the DOM
+    setupControls.offsetHeight;
+    
+    // Calculate final height before transition
+    const expandedHeight = setupControls.scrollHeight;
+    
+    // Set initial height (same as collapsed height)
+    setupControls.style.height = '375px';  
+    
+    // Add collapsing class for transition
+    setupControls.classList.add('collapsing');
+    
+    // Force reflow again before changing height
+    setupControls.offsetHeight;
+    
+    // Set target height to trigger animation - need to delay opacity change
+    setupControls.style.height = expandedHeight + 'px';
+    
+    // After panel has expanded significantly but before it completes,
+    // begin fading in content with a carefully timed delay
+    setTimeout(() => {
+      // Ensure content is still set to 0 opacity (defensive)
+      content.style.opacity = '0';
+      
+      // Force a reflow before starting the fade-in animation
+      content.offsetHeight;
+      
+    }, 200); // Slight delay to ensure height transition has progressed enough
+    
+    // Remove inline styles and animation class after transition completes
+    setTimeout(() => {
+      setupControls.classList.remove('collapsing');
+      setupControls.style.height = '';
+      // Now set to 1 to trigger the CSS transition
+      content.style.opacity = '1';
+    }, 500);
   }
   
   // Reset auto-collapse timer

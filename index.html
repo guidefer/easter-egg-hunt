@@ -38,7 +38,7 @@
     </div>
 
     <!-- Setup Controls Panel - Now outside setup containers for better toggle button visibility -->
-    <div id="setup-controls" class="hidden">
+    <div id="setup-controls" class="ui-panel hidden">
         <div class="setup-controls-content">
             <h2>Easter Egg Hunt Setup</h2>
             <button id="settings-btn-setup" class="settings-btn" title="Game Settings">⚙️</button>
@@ -78,6 +78,23 @@
                 ▲
             </button>
         </div>
+    </div>
+    
+    <!-- Legacy UI elements (hidden but needed for JavaScript compatibility) -->
+    <div id="clue-display" class="hidden">
+        <div id="current-clue-old"></div>
+        <div class="clue-counter">
+            Clue <span id="clue-number-old">1</span> of <span id="total-clues-old">0</span>
+        </div>
+        <button id="hint-button-old" class="control-btn">Need a Hint?</button>
+    </div>
+    
+    <div id="floating-ui" class="hidden">
+        <h2>Easter Egg Hunt</h2>
+        <div id="score">
+            Found: <span id="found-count-old">0</span>/<span id="total-count-old">0</span>
+        </div>
+        <button id="reset-btn-old" class="control-btn">Reset Hunt</button>
     </div>
     
     <!-- Egg Edit Modal Dialog -->
@@ -131,7 +148,7 @@
     </div>
     
     <!-- New Unified Hunt UI Panel - Now outside game-container for better z-index handling -->
-    <div id="hunt-ui-panel" class="hidden">
+    <div id="hunt-ui-panel" class="ui-panel hidden">
         <div class="hunt-ui-content">
             <h2>Easter Egg Hunt!</h2>
             <div class="hunt-ui-counters">
@@ -146,29 +163,10 @@
             <button id="reset-btn" class="control-btn">Reset Hunt</button>
             <div class="easter-decoration">🐰 🥚 🐣</div>
         </div>
-        <div class="hunt-ui-toggle">
-            <button id="hunt-ui-toggle-btn" class="icon-button toggle-btn" title="Expand/Collapse Panel">
-                ▲
-            </button>
-        </div>
+        <button id="hunt-ui-toggle-btn" class="icon-button toggle-btn" title="Expand/Collapse Panel">
+            ▲
+        </button>
     </div>
-    
-    <!-- OLD Clue display - Will be removed once new UI is working -->
-    <div id="clue-display" class="hidden">
-        <h3>Find this egg:</h3>
-        <p id="current-clue-old"></p>
-        <div class="clue-counter">Clue <span id="clue-number-old">1</span> of <span id="total-clues-old">0</span></div>
-        <button id="hint-button-old" class="control-btn">Need a Hint?</button>
-    </div>
-    
-    <!-- OLD Floating UI - Will be removed once new UI is working -->
-    <div id="floating-ui" class="hidden">
-        <h2>Easter Egg Hunt!</h2>
-        <div id="score">Eggs found: <span id="found-count-old">0</span>/<span id="total-count-old">0</span></div>
-        <button id="reset-btn-old">Reset Hunt</button>
-        <div class="easter-decoration">🐰 🥚 🐣</div>
-    </div>
-    
     <!-- Camera Modal -->
     <div id="camera-modal" class="hidden">
         <div class="camera-container">
@@ -217,6 +215,9 @@
     <audio id="egg-found-sound"></audio>
     <audio id="hint-sound"></audio>
     <audio id="celebration-sound"></audio>
+    
+    <!-- Confetti canvas for celebration animations -->
+    <canvas id="confetti-canvas" class="hidden"></canvas>
     
     <script src="script.js"></script>
 </body>
