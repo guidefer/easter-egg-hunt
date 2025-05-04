@@ -435,15 +435,33 @@ function toggleHuntUIPanel() {
   // Toggle collapsed state
   huntUIPanelCollapsed = !huntUIPanelCollapsed;
   
-  // Update panel class and ARIA attributes
+  // Update toggle button
+  toggleBtn.innerHTML = huntUIPanelCollapsed ? '▼' : '▲';
+  toggleBtn.setAttribute('aria-expanded', !huntUIPanelCollapsed);
+  
+  // Mark panel as transitioning to prevent interaction during animation
+  huntUIPanel.classList.add('transitioning');
+  
+  // Collapsing animation (center → top)
   if (huntUIPanelCollapsed) {
+    // Use specific CSS styles for collapsing, without any inline styles
+    // that might conflict with CSS transitions
     huntUIPanel.classList.add('collapsed');
-    toggleBtn.setAttribute('aria-expanded', 'false');
-    toggleBtn.innerHTML = '▼'; // Down arrow - consistent with setup controls
-  } else {
+    
+    // Remove transitioning class after animation completes
+    setTimeout(() => {
+      huntUIPanel.classList.remove('transitioning');
+    }, 400);
+  } 
+  // Expanding animation (top → center)
+  else {
+    // Use specific CSS styles for expanding, without any inline styles
     huntUIPanel.classList.remove('collapsed');
-    toggleBtn.setAttribute('aria-expanded', 'true');
-    toggleBtn.innerHTML = '▲'; // Up arrow - consistent with setup controls
+    
+    // Remove transitioning class after animation completes
+    setTimeout(() => {
+      huntUIPanel.classList.remove('transitioning');
+    }, 400);
   }
   
   // Reset auto-collapse timer
@@ -797,9 +815,9 @@ function createNewEggAtPosition(x, y) {
     const areaRect = eggPlacementArea.getBoundingClientRect();
     
     // Calculate position as percentages for responsive behavior
-    // This position represents the top-left corner of the egg
-    const left = Math.max(0, Math.min(100, (x / areaRect.width) * 100));
-    const top = Math.max(0, Math.min(100, (y / areaRect.height) * 100));
+    // First calculate position as if it were the top-left corner
+    let left = Math.max(0, Math.min(100, (x / areaRect.width) * 100));
+    let top = Math.max(0, Math.min(100, (y / areaRect.height) * 100));
     
     // Set global variables for the new egg
     isNewEgg = true;
@@ -810,7 +828,8 @@ function createNewEggAtPosition(x, y) {
     modalEggClue.value = '';
     
     // Store the position information - will be used when saving
-    // Store as percentage values for responsive positioning
+    // Store as percentage values for responsive positioning with transform adjustment
+    // Use transform: translate(-50%, -50%) in CSS to center the egg on the crosshair
     modalEggClue.dataset.tempLeft = left + '%';
     modalEggClue.dataset.tempTop = top + '%';
     

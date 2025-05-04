@@ -144,4 +144,15 @@ This project is an HTML, CSS, and JavaScript Easter egg hunt game with the follo
 - Optimize touch events with passive listeners where appropriate
 - Manage resources properly (stop audio, clear intervals when not needed)
 
+## Panel Animation Best Practices
+- Prefer CSS transitions over JavaScript animations for UI panels
+- Use the transitioning class pattern to prevent interaction during animations
+- Keep animations smooth by using will-change CSS property for better performance
+- Follow a clean two-stage approach for animations:
+  1. Add/remove the proper CSS classes
+  2. Clean up after the animation completes with a setTimeout
+- Avoid inline styles that conflict with CSS transitions
+- Properly handle edge cases like multiple quick toggles
+- Prevent position jumps by ensuring consistent transform styles
+
 When modifying this project, always ensure changes maintain compatibility with existing features and the established visual style. Test all changes on both desktop and mobile devices.
