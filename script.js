@@ -1913,7 +1913,7 @@ function updateBackgroundImage(backgroundImage) {
     
     // Use CSS background-image instead of img element for better event handling
     container.style.backgroundImage = `url('${backgroundImage}')`;
-    container.style.backgroundSize = 'cover'; // Use 'cover' to fill container
+    container.style.backgroundSize = 'contain';
     container.style.backgroundPosition = 'center';
     container.style.backgroundRepeat = 'no-repeat';
     
