@@ -606,67 +606,72 @@ body, html {
 /* Common styles for all eggs */
 .egg, .setup-egg {
     position: absolute;
-    width: 48px;
-    height: 48px;
-    background: none;
+    width: 56px;
+    height: 56px;
+    background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,240,240,0.95) 100%);
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px;
-    filter: drop-shadow(0px 0px 3px white) drop-shadow(0px 0px 5px rgba(0,0,0,0.5));
+    font-size: 36px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+    filter: drop-shadow(0px 0px 3px white);
     margin: 0;
     padding: 0;
     transition: opacity 0.3s ease, transform 0.2s ease;
     border: none;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
+    transform: translate(-50%, -50%); /* Center the egg on its position coordinates */
+}
+
+/* Ensure the egg is always centered, even when being dragged */
+.setup-egg.dragging {
+    z-index: 100; /* Ensure dragging egg is on top */
+    transition: none; /* Remove transition while dragging for responsive feel */
+    opacity: 0.8; /* Slight transparency while dragging */
 }
 
 /* Egg z-index levels */
 .egg {
     z-index: 1000;
     cursor: pointer;
-    transform: translate(-50%, -50%); /* Center the egg on its position coordinates */
 }
 
 .setup-egg {
     z-index: 5;
     cursor: move;
     visibility: visible !important; /* Ensure eggs are always visible in setup mode */
-    transform: translate(-50%, -50%); /* Center the egg on the cursor position */
 }
 
-/* Common styles for egg background */
+/* Common styles for egg content */
 .egg::before, .setup-egg::before {
     content: '🐰'; /* Use bunny emoji */
-    background-color: rgba(255, 255, 255);
-    border-radius: 50%;
-    width: 48px;
-    height: 48px;
+    font-size: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+    width: 100%;
+    height: 100%;
 }
 
-/* Add egg number */
-.setup-egg::after {
-    content: attr(data-number);
+/* Number label for eggs */
+.egg-number {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
     background-color: rgba(255, 255, 255, 0.95);
     border-radius: 50%;
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: bold;
     color: #ff66b3;
     box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
-    position: absolute;
-    bottom: -2px;
-    right: -2px;
-    z-index: 7;
+    z-index: 10;
 }
 
 /* Found egg states */
@@ -764,6 +769,15 @@ body, html {
     font-size: 1em;
 }
 
+/* Prevent textarea resizing */
+.form-group textarea,
+#egg-editor textarea,
+#modal-egg-clue {
+    resize: none; /* Prevent manual resizing */
+    min-height: 80px; /* Set a fixed minimum height */
+    height: auto; /* Allow height to adjust to content */
+}
+
 /* Custom file input styling */
 .custom-file-input {
     font-family: inherit;
@@ -813,6 +827,51 @@ body, html {
     list-style: none;
     padding: 0;
     margin: 0;
+}
+
+/* Individual egg list item */
+.egg-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    margin-bottom: 5px;
+    border-bottom: 1px dashed #ffcccc;
+    width: 100%;
+}
+
+/* Container for egg number and clue text */
+.egg-list-text-container {
+    flex: 1; /* Allow text to take available space */
+    min-width: 0; /* Prevent flex item from overflowing */
+    overflow: hidden; /* Hide overflow */
+    white-space: nowrap; /* Prevent text wrapping */
+    text-overflow: ellipsis; /* Show ellipsis for overflow */
+    margin-right: 10px; /* Space between text and button */
+}
+
+/* Egg number in the list */
+.egg-list-number {
+    font-weight: bold;
+    color: #ff66b3;
+}
+
+/* Clue text in the list */
+.egg-list-clue-text {
+    color: #8855dd;
+    /* Ensure it doesn't prevent container truncation */
+    display: inline; 
+}
+
+/* Edit button in the egg list */
+.egg-list-edit-btn {
+    padding: 0; /* Remove padding */
+    min-width: 40px; /* Ensure minimum width */
+    height: 24px; /* Fixed height */
+    font-size: 0.8rem; /* Smaller font */
+    flex-shrink: 0; /* Prevent button from shrinking */
+    margin-left: 5px; /* Space from text */
+    /* Inherits .control-btn styles, override padding */
 }
 
 /* Clue counter */
@@ -899,6 +958,33 @@ body, html {
     color: #ff66b3;
     margin-top: 0;
     text-align: center;
+}
+
+/* Egg modal specific styles */
+#egg-modal .egg-number-display {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+#egg-modal .egg-number-display label {
+    margin: 0 10px 0 0;
+    display: inline-block;
+}
+
+#egg-modal .egg-number-value {
+    font-weight: bold;
+    color: #ff66b3;
+    font-size: 1.1em;
+}
+
+#egg-modal textarea {
+    padding: 8px 10px;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 5px 0 10px 0;
+    height: 70px;
+    resize: none;
 }
 
 /* Congratulations modal specific styles */
@@ -1455,5 +1541,386 @@ body, html {
         bottom: 5px;
         right: 5px;
         font-size: 0.7em;
+    }
+}
+
+/* Background Presets Modal Styling */
+.presets-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin: 15px 0;
+    padding: 10px;
+}
+
+.preset-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 15px;
+    background-color: #f9f9f9;
+    border: 2px solid #ffcccc;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-width: 90px;
+}
+
+.preset-button:hover {
+    background-color: #ffcccc;
+    transform: scale(1.05);
+}
+
+.preset-button.selected {
+    background-color: #ff99cc;
+    border-color: #ff66b3;
+    color: white;
+    transform: scale(1.05);
+}
+
+.preset-emoji {
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.preset-name {
+    font-size: 14px;
+    font-weight: bold;
+    color: #8855dd;
+}
+
+.preset-button.selected .preset-name {
+    color: white;
+}
+
+.preset-preview-container {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.preset-preview-container h3 {
+    color: #ff66b3;
+    margin-bottom: 10px;
+}
+
+#preset-preview {
+    height: 150px;
+    border: 2px dashed #ffcccc;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#preset-preview-placeholder {
+    color: #8855dd;
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 10px;
+    border-radius: 5px;
+    font-style: italic;
+}
+
+/* Update existing modal styles for consistency */
+.modal .button-group {
+    margin-top: 20px;
+}
+
+/* Mobile optimization */
+@media (max-width: 480px) {
+    .preset-button {
+        padding: 10px;
+        min-width: 70px;
+    }
+    
+    .preset-emoji {
+        font-size: 24px;
+    }
+    
+    .preset-name {
+        font-size: 12px;
+    }
+    
+    #preset-preview {
+        height: 120px;
+    }
+}
+
+/* Background Presets Modal Styles */
+.presets-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 20px;
+    padding: 10px;
+}
+
+.preset-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 100px;
+    padding: 10px;
+    border-radius: 12px;
+    background-color: #ffeeee;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 3px solid transparent;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.preset-button:hover {
+    background-color: #ffe0e0;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+}
+
+.preset-button.selected {
+    border-color: #ff66b3;
+    background-color: #ffcccc;
+    transform: translateY(-3px);
+}
+
+.preset-emoji {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.preset-name {
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+.preset-preview-container {
+    margin: 15px 0 25px;
+}
+
+.preset-preview-container h3 {
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+#preset-preview {
+    width: 100%;
+    height: 180px;
+    border-radius: 12px;
+    background-color: #f8f8f8;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.2);
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+#preset-preview-placeholder {
+    padding: 15px;
+    text-align: center;
+    color: #999;
+    font-style: italic;
+}
+
+/* Mobile styles for presets */
+@media (max-width: 480px) {
+    .presets-container {
+        gap: 10px;
+    }
+    
+    .preset-button {
+        width: 70px;
+        height: 70px;
+        padding: 5px;
+    }
+    
+    .preset-emoji {
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+    }
+    
+    .preset-name {
+        font-size: 0.8rem;
+    }
+    
+    #preset-preview {
+        height: 120px;
+    }
+}
+
+/* Background Presets Modal Styling */
+.background-presets-modal-content {
+    max-width: 550px;
+    position: relative;
+    padding-top: 30px;
+}
+
+.background-presets-modal-content .modal-title {
+    color: #ff66b3;
+    margin-top: 0;
+    text-align: center;
+    font-size: 1.8em;
+}
+
+.background-presets-modal-content .subtitle {
+    color: #8855dd;
+    text-align: center;
+    margin-bottom: 10px; /* Reduced from 20px to 10px */
+}
+
+.preset-layout-container {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    margin: 5px 0; /* Reduced from 10px 0 to 5px 0 */
+    align-items: center;
+}
+
+.presets-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    flex: 1;
+    justify-content: center;
+    align-content: center;
+    max-width: 55%;
+}
+
+.preset-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 70px;
+    height: 70px;
+    padding: 8px;
+    border-radius: 12px;
+    background-color: #ffeeee;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 3px solid transparent;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.preset-button:hover {
+    background-color: #ffe0e0;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+}
+
+.preset-button.selected {
+    border-color: #ff66b3;
+    background-color: #ffcccc;
+    transform: translateY(-3px);
+}
+
+.preset-emoji {
+    font-size: 2.2rem;
+    margin-bottom: 5px;
+}
+
+.preset-name {
+    font-size: 0.9rem;
+    font-weight: bold;
+    text-align: center;
+    color: #8855dd;
+}
+
+.preset-preview-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+#preset-preview {
+    flex: 1;
+    min-height: 350px;
+    border-radius: 12px;
+    background-color: #f8f8f8;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #ffcccc;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Removed the ::before pseudo-element that was adding the "Preview" heading */
+
+#preset-preview-placeholder {
+    color: #8855dd;
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 10px;
+    border-radius: 5px;
+    font-style: italic;
+}
+
+/* Close button styling for modals */
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #ffcccc;
+    border: none;
+    color: #ff66b3;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 10;
+    padding: 0;
+    line-height: 1;
+}
+
+.close-btn:hover {
+    background-color: #ff99cc;
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Mobile optimization */
+@media (max-width: 600px) {
+    .preset-layout-container {
+        flex-direction: column;
+    }
+    
+    .presets-container {
+        justify-content: center;
+        max-width: 100%;
+    }
+    
+    #preset-preview {
+        min-height: 200px;
+    }
+    
+    .preset-button {
+        width: 65px;
+        height: 65px;
+    }
+    
+    .preset-emoji {
+        font-size: 1.8rem;
+    }
+    
+    .preset-name {
+        font-size: 0.8rem;
     }
 }
